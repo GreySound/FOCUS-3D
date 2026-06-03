@@ -1,0 +1,92 @@
+-- ════════════════════════════════════════════
+-- Focus 3D — Schema de base de datos
+-- Pega esto en el SQL Editor de Supabase
+-- ════════════════════════════════════════════
+
+-- Productos
+create table if not exists productos (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null,
+  descripcion text,
+  linea text check (linea in ('Essentials','Statement','Signature','Custom','B2B')),
+  precio_min int not null,
+  precio_max int not null,
+  stock int default 5,
+  estado text default 'disponible' check (estado in ('disponible','agotado','bajo_pedido')),
+  imagenes text[] default '{}',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- Pedidos
+create table if not exists pedidos (
+  id uuid primary key default gen_random_uuid(),
+  nombre_cliente text not null,
+  email text not null,
+  telefono text,
+  canal text check (canal in ('instagram','mercadolibre','whatsapp','web')),
+  estado text default 'nuevo' check (estado in ('nuevo','en_proceso','listo','enviado','entregado')),
+  total int,
+  notas text,
+  created_at timestamptz default now()
+);
+
+-- Items de pedido
+create table if not exists pedido_items (
+  id uuid primary key default gen_random_uuid(),
+  pedido_id uuid references pedidos(id) on delete cascade,
+  producto_id uuid references productos(id),
+  cantidad int default 1,
+  precio_unitario int not null,
+  acabado text
+);
+
+-- Mensajes de contacto
+create table if not exists mensajes (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null,
+  email text not null,
+  telefono text,
+  interes text,
+  mensaje text,
+  producto_ref uuid references productos(id),
+  leido boolean default false,
+  created_at timestamptz default now()
+);
+
+-- Trigger: actualiza updated_at en productos
+create or replace function update_updated_at()
+returns trigger as $$
+begin new.updated_at = now(); return new; end;
+$$ language plpgsql;
+
+create trigger productos_updated_at
+  before update on productos
+  for each row execute function update_updated_at();
+
+-- Storage bucket para imágenes de productos
+insert into storage.buckets (id, name, public)
+values ('productos', 'productos', true)
+on conflict do nothing;
+
+-- Política: lectura pública de imágenes
+create policy "Imágenes públicas" on storage.objects
+  for select using (bucket_id = 'productos');
+
+-- Política: solo admin puede subir/borrar
+create policy "Admin upload" on storage.objects
+  for insert with check (bucket_id = 'productos');
+
+create policy "Admin delete" on storage.objects
+  for delete using (bucket_id = 'productos');
+
+-- RLS: tablas públicas de solo lectura para la tienda
+alter table productos enable row level security;
+alter table pedidos enable row level security;
+alter table pedido_items enable row level security;
+alter table mensajes enable row level security;
+
+create policy "Productos públicos" on productos for select using (true);
+create policy "Insertar mensajes" on mensajes for insert with check (true);
+create policy "Insertar pedidos" on pedidos for insert with check (true);
+create policy "Insertar items" on pedido_items for insert with check (true);
