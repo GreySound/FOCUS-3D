@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import Link from 'next/link'
+import { siteConfig } from '@/lib/site-config'
 import type { Producto } from '@/lib/supabase'
 
 export default async function Home() {
@@ -159,8 +160,8 @@ export default async function Home() {
         <h2 className="section-title mb-16">Dos formas<br /><em className="text-ash">de llegar a nosotros.</em></h2>
         <div className="grid md:grid-cols-2 gap-0.5 bg-marble">
           {[
-            { icon: '🛒', tag: 'Tienda oficial', name: 'Mercado Libre', desc: 'Compra segura con protección al comprador. Pago en línea, envíos a todo México, reseñas verificadas.', cta: 'Visitar tienda', href: 'https://www.mercadolibre.com.mx' },
-            { icon: '📸', tag: 'Pedidos custom · DM abierto', name: 'Instagram', desc: 'Para piezas personalizadas y cotizaciones B2B. Respondemos en menos de 2 horas.', cta: 'Escribirnos', href: 'https://www.instagram.com' },
+            { icon: '🛒', tag: 'Tienda oficial', name: 'Mercado Libre', desc: 'Compra segura con protección al comprador. Pago en línea, envíos a todo México, reseñas verificadas.', cta: 'Visitar tienda', href: siteConfig.social.mercadoLibre.url },
+            { icon: '📸', tag: 'Pedidos custom · DM abierto', name: 'Instagram', desc: 'Para piezas personalizadas y cotizaciones B2B. Respondemos en menos de 2 horas.', cta: 'Escribirnos', href: siteConfig.social.instagram.url },
           ].map(({ icon, tag, name, desc, cta, href }) => (
             <a key={name} href={href} target="_blank" rel="noopener noreferrer"
               className="bg-pearl p-12 flex flex-col gap-5 hover:bg-carbon hover:text-pearl transition-all duration-300 group no-underline">

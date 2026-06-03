@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ContactForm from './ContactForm'
+import { siteConfig, whatsappLink } from '@/lib/site-config'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Contacto' }
@@ -18,11 +19,12 @@ export default function ContactoPage() {
               <h1 className="section-title mb-10">Hablemos de<br /><em className="text-stone">tu espacio.</em></h1>
               <div className="flex flex-col gap-7">
                 {[
-                  { label: 'Instagram', value: '@focus3d.art', href: 'https://www.instagram.com' },
-                  { label: 'Mercado Libre', value: 'Focus 3D — Tienda Oficial', href: 'https://www.mercadolibre.com.mx' },
-                  { label: 'WhatsApp', value: '+52 1 (XX) XXXX-XXXX', href: 'https://wa.me/521XXXXXXXXXX' },
-                  { label: 'Tiempo de respuesta', value: 'Menos de 2 horas en horario hábil', href: null },
-                  { label: 'Envíos', value: 'Todo México · 3–7 días hábiles', href: null },
+                  { label: 'Instagram', value: siteConfig.social.instagram.handle, href: siteConfig.social.instagram.url },
+                  { label: 'Mercado Libre', value: siteConfig.social.mercadoLibre.label, href: siteConfig.social.mercadoLibre.url },
+                  { label: 'WhatsApp', value: siteConfig.contact.phone, href: whatsappLink() },
+                  { label: 'Email', value: siteConfig.contact.email, href: `mailto:${siteConfig.contact.email}` },
+                  { label: 'Tiempo de respuesta', value: siteConfig.contact.responseTime, href: null },
+                  { label: 'Envíos', value: siteConfig.contact.shipping, href: null },
                 ].map(({ label, value, href }) => (
                   <div key={label} className="border-l-2 border-gold pl-5">
                     <div className="font-mono text-[9px] tracking-[3px] uppercase text-gold mb-1">{label}</div>
