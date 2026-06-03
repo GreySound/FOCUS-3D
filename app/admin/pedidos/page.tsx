@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import type { Pedido } from '@/lib/supabase'
 import PedidoEstadoBtn from './PedidoEstadoBtn'
 
@@ -12,7 +12,7 @@ const ESTADO_COLOR: Record<string, string> = {
 }
 
 export default async function AdminPedidos() {
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminSupabaseClient()
   const { data: pedidos } = await supabase
     .from('pedidos')
     .select('*, pedido_items(*, productos(nombre))')

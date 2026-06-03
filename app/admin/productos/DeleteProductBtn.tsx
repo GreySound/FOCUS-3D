@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
+import { deleteProducto } from '@/lib/admin-actions'
 import { useRouter } from 'next/navigation'
 
 export default function DeleteProductBtn({ id, nombre }: { id: string; nombre: string }) {
@@ -8,8 +8,7 @@ export default function DeleteProductBtn({ id, nombre }: { id: string; nombre: s
   const router = useRouter()
 
   const handleDelete = async () => {
-    const supabase = createClient()
-    await supabase.from('productos').delete().eq('id', id)
+    await deleteProducto(id)
     router.refresh()
   }
 

@@ -1,19 +1,18 @@
 'use server'
 
-import { createClient } from '@supabase/supabase-js'
-import { createHash } from 'crypto'
-import { cookies } from 'next/headers'
+import { createAdminSupabaseClient } from './supabase-admin'
+import { isAdminAuthenticated } from './auth'
 
-function hashPassword(pw: string): string {
-  return createHash('sha256').update(pw + 'focus3d_salt').digest('hex')
+const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
 }
 
 export async function uploadImage(formData: FormData): Promise<{ url?: string; error?: string }> {
-  const cookieStore = await cookies()
-  const auth = cookieStore.get('admin_auth')
-  const expected = hashPassword(process.env.ADMIN_PASSWORD ?? '')
-
-  if (!auth || auth.value !== expected) {
+  if (!(await isAdminAuthenticated())) {
     return { error: 'No autorizado' }
   }
 
@@ -21,21 +20,20 @@ export async function uploadImage(formData: FormData): Promise<{ url?: string; e
   if (!file || file.size === 0) {
     return { error: 'No se recibió archivo' }
   }
+  if (file.size > MAX_SIZE) {
+    return { error: 'La imagen supera el tamaño máximo (5 MB)' }
+  }
+
+  // Solo formatos de imagen permitidos
+  const ext = MIME_TO_EXT[file.type]
+  if (!ext) {
+    return { error: 'Formato no permitido. Usa JPG, PNG o WEBP.' }
+  }
 
   // Nombre 100% seguro — solo números y extensión conocida
-  const mimeToExt: Record<string, string> = {
-    'image/jpeg': 'jpg',
-    'image/jpg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-  }
-  const ext = mimeToExt[file.type] ?? 'jpg'
   const path = `p${Date.now()}.${ext}`
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = createAdminSupabaseClient()
 
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
@@ -43,7 +41,7 @@ export async function uploadImage(formData: FormData): Promise<{ url?: string; e
   const { data, error } = await supabase.storage
     .from('productos')
     .upload(path, buffer, {
-      contentType: file.type || 'image/jpeg',
+      contentType: file.type,
       upsert: true,
     })
 
@@ -58,4 +56,3 @@ export async function uploadImage(formData: FormData): Promise<{ url?: string; e
 
   return { url: publicUrl }
 }
-

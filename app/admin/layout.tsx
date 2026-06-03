@@ -1,18 +1,9 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createHash } from 'crypto'
+import { isAdminAuthenticated } from '@/lib/auth'
 import AdminSidebar from './AdminSidebar'
 
-function hashPassword(pw: string): string {
-  return createHash('sha256').update(pw + 'focus3d_salt').digest('hex')
-}
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies()
-  const auth = cookieStore.get('admin_auth')
-  const expectedToken = hashPassword(process.env.ADMIN_PASSWORD ?? '')
-
-  if (!auth || auth.value !== expectedToken) {
+  if (!(await isAdminAuthenticated())) {
     redirect('/login')
   }
 
