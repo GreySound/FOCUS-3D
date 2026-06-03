@@ -32,10 +32,6 @@ export async function uploadImage(formData: FormData): Promise<{ url?: string; e
   const ext = mimeToExt[file.type] ?? 'jpg'
   const path = `p${Date.now()}.${ext}`
 
-  console.log('Subiendo archivo:', { path, type: file.type, size: file.size })
-  console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-console.log('Service key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
-
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -60,7 +56,6 @@ console.log('Service key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
     .from('productos')
     .getPublicUrl(data.path)
 
-  console.log('Subida exitosa:', publicUrl)
   return { url: publicUrl }
 }
 
