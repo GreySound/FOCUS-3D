@@ -6,7 +6,10 @@ export default function Footer() {
     <footer className="bg-ink border-t border-stone/10 px-6 md:px-16 py-16">
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
         <div className="col-span-2 md:col-span-1">
-          <div className="font-serif text-2xl italic text-pearl mb-3">{siteConfig.name}</div>
+          <div className="flex items-center gap-2.5 mb-3">
+            <img src="/branding/logo-mark.svg" alt="" aria-hidden="true" className="w-8 h-8" />
+            <div className="font-serif text-2xl italic text-pearl">{siteConfig.name}</div>
+          </div>
           <p className="text-ash text-sm font-light leading-relaxed max-w-[240px]">
             Arte escultórico de autor. Impresión 3D con acabados de galería. Hecho en {siteConfig.country}.
           </p>
