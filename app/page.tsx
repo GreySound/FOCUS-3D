@@ -2,6 +2,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
+import ClassicalBackdrop from '@/components/ClassicalBackdrop'
+import NewsletterSignup from '@/components/NewsletterSignup'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/site-config'
 import type { Producto } from '@/lib/supabase'
@@ -179,9 +181,23 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── CUPÓN DE BIENVENIDA ── */}
+      <section className="relative bg-ink px-6 md:px-16 py-24 md:py-32 overflow-hidden">
+        <ClassicalBackdrop />
+        <div className="relative z-10 max-w-xl mx-auto text-center">
+          <div className="section-tag mb-5">Cupón de bienvenida</div>
+          <h2 className="section-title mb-5">10% en tu<br /><em className="text-gold">primera pieza.</em></h2>
+          <p className="text-marble font-light leading-relaxed mb-10">
+            Suscríbete con tu WhatsApp y recibe tu cupón del 10%. Además serás el primero
+            en enterarte de nuevos lanzamientos y promociones.
+          </p>
+          <div className="max-w-sm mx-auto text-left">
+            <NewsletterSignup />
+          </div>
+        </div>
+      </section>
+
       <Footer />
-
-
     </>
   )
 }

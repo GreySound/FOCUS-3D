@@ -7,6 +7,7 @@ const links = [
   { href: '/admin/productos', label: 'Productos', icon: '◉' },
   { href: '/admin/pedidos', label: 'Pedidos', icon: '◎' },
   { href: '/admin/mensajes', label: 'Mensajes', icon: '◌' },
+  { href: '/admin/suscriptores', label: 'Suscriptores', icon: '✦' },
 ]
 
 export default function AdminSidebar() {

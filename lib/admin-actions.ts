@@ -135,3 +135,34 @@ export async function eliminarMensaje(id: string): Promise<Result> {
   revalidatePath('/admin')
   return { ok: true }
 }
+
+
+// ── Suscriptores ───────────────────────────────────────────
+export async function marcarSuscriptorVerificado(id: string, verificado = true): Promise<Result> {
+  const denied = await ensureAdmin()
+  if (denied) return denied
+  if (!id) return { ok: false, error: 'ID requerido' }
+
+  const supabase = createAdminSupabaseClient()
+  const { error } = await supabase
+    .from('suscriptores')
+    .update({ estado: verificado ? 'verificado' : 'pendiente' })
+    .eq('id', id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/admin/suscriptores')
+  return { ok: true }
+}
+
+export async function eliminarSuscriptor(id: string): Promise<Result> {
+  const denied = await ensureAdmin()
+  if (denied) return denied
+  if (!id) return { ok: false, error: 'ID requerido' }
+
+  const supabase = createAdminSupabaseClient()
+  const { error } = await supabase.from('suscriptores').delete().eq('id', id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/admin/suscriptores')
+  return { ok: true }
+}
