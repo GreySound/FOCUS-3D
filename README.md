@@ -49,7 +49,7 @@ npm run dev
 Abre http://localhost:3000
 
 ### 8. Acceder al panel admin
-Ve a http://localhost:3000/admin/login  
+Ve a http://localhost:3000/login  
 Contraseña: la que pusiste en `ADMIN_PASSWORD` del `.env.local`
 
 ---

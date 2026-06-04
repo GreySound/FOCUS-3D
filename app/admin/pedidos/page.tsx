@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import type { Pedido } from '@/lib/supabase'
 import PedidoEstadoBtn from './PedidoEstadoBtn'
 
 const ESTADOS = ['nuevo', 'en_proceso', 'listo', 'enviado', 'entregado']
