@@ -20,7 +20,7 @@ export default async function CatalogoPage({
   if (linea) query = query.eq('linea', linea)
   if (estado) query = query.eq('estado', estado)
 
-  const { data: productos } = await query
+  const { data: productos, error } = await query
 
   return (
     <>
@@ -34,7 +34,11 @@ export default async function CatalogoPage({
         <section className="bg-carbon px-6 md:px-16 py-16">
           <CatalogFilters active={linea} />
 
-          {productos && productos.length > 0 ? (
+          {error ? (
+            <div className="text-center py-32">
+              <p className="font-serif text-2xl italic text-ash">No pudimos cargar el catálogo en este momento. Intenta recargar la página.</p>
+            </div>
+          ) : productos && productos.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0.5 bg-stone/10 mt-10">
               {(productos as Producto[]).map(p => <ProductCard key={p.id} p={p} />)}
             </div>

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { type Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/upload-action'
 import { saveProducto } from '@/lib/admin-actions'
@@ -112,7 +113,7 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
         <div className="flex flex-wrap gap-3">
           {images.map(url => (
             <div key={url} className="relative w-24 h-24 bg-carbon border border-stone/20">
-              <img src={url} alt="" className="w-full h-full object-cover" />
+              <Image src={url} alt="" fill sizes="96px" className="object-cover" />
               <button type="button" onClick={() => removeImage(url)}
                 className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center hover:bg-red-600">
                 ×

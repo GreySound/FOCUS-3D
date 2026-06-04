@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Producto } from '@/lib/supabase'
 import DeleteProductBtn from './DeleteProductBtn'
 
@@ -24,9 +25,9 @@ export default async function AdminProductos() {
           {(productos as Producto[]).map(p => (
             <div key={p.id} className="bg-ink border border-stone/10 p-5 flex items-center gap-4 hover:border-stone/25 transition-all">
               {/* Imagen miniatura */}
-              <div className="w-16 h-16 bg-carbon flex-shrink-0 overflow-hidden">
+              <div className="w-16 h-16 bg-carbon flex-shrink-0 overflow-hidden relative">
                 {p.imagenes?.[0] ? (
-                  <img src={p.imagenes[0]} alt={p.nombre} className="w-full h-full object-cover" />
+                  <Image src={p.imagenes[0]} alt={p.nombre} fill className="object-cover" sizes="64px" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-stone text-xs">—</div>
                 )}

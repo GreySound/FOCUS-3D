@@ -10,7 +10,7 @@ import type { Producto } from '@/lib/supabase'
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient()
-  const { data: productos } = await supabase
+  const { data: productos, error } = await supabase
     .from('productos')
     .select('*')
     .eq('estado', 'disponible')
@@ -122,7 +122,11 @@ export default async function Home() {
           </div>
           <Link href="/catalogo" className="btn-ghost">Ver todo el catálogo</Link>
         </div>
-        {productos && productos.length > 0 ? (
+        {error ? (
+          <div className="text-center py-24 text-ash font-light italic font-serif text-xl">
+            No pudimos cargar las piezas en este momento. Intenta recargar la página.
+          </div>
+        ) : productos && productos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0.5 bg-stone/10">
             {(productos as Producto[]).map(p => <ProductCard key={p.id} p={p} />)}
           </div>

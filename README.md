@@ -1,6 +1,6 @@
 # Focus 3D — Sitio web completo
 
-Stack: **Next.js 14** + **Supabase** + **Vercel** + **Tailwind CSS**
+Stack: **Next.js 16** + **Supabase** + **Vercel** + **Tailwind CSS**
 
 ---
 
