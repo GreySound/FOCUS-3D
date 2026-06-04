@@ -1,18 +1,22 @@
 import Link from 'next/link'
+import { siteConfig, whatsappLink } from '@/lib/site-config'
 
 export default function Footer() {
   return (
     <footer className="bg-ink border-t border-stone/10 px-6 md:px-16 py-16">
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
         <div className="col-span-2 md:col-span-1">
-          <div className="font-serif text-2xl italic text-pearl mb-3">Focus 3D</div>
+          <div className="flex items-center gap-2.5 mb-3">
+            <img src="/branding/logo-mark.svg" alt="" aria-hidden="true" className="w-8 h-8" />
+            <div className="font-serif text-2xl italic text-pearl">{siteConfig.name}</div>
+          </div>
           <p className="text-ash text-sm font-light leading-relaxed max-w-[240px]">
-            Arte escultórico de autor. Impresión 3D con acabados de galería. Hecho en México.
+            Arte escultórico de autor. Impresión 3D con acabados de galería. Hecho en {siteConfig.country}.
           </p>
         </div>
         {[
           { title: 'Navegar', links: [['Inicio', '/'], ['Catálogo', '/catalogo'], ['Contacto', '/contacto']] },
-          { title: 'Tiendas', links: [['Mercado Libre', 'https://www.mercadolibre.com.mx'], ['Instagram', 'https://www.instagram.com'], ['WhatsApp', 'https://wa.me/521XXXXXXXXXX']] },
+          { title: 'Tiendas', links: [['Mercado Libre', siteConfig.social.mercadoLibre.url], ['Instagram', siteConfig.social.instagram.url], ['WhatsApp', whatsappLink()]] },
           { title: 'Líneas', links: [['Essentials', '/catalogo?linea=Essentials'], ['Statement', '/catalogo?linea=Statement'], ['Signature', '/catalogo?linea=Signature'], ['Custom / B2B', '/catalogo?linea=Custom']] },
         ].map(({ title, links }) => (
           <div key={title}>
@@ -30,8 +34,8 @@ export default function Footer() {
         ))}
       </div>
       <div className="border-t border-stone/10 pt-6 flex flex-col md:flex-row justify-between gap-2">
-        <span className="font-mono text-[10px] tracking-wide text-ash">© 2025 Focus 3D — Arte Escultórico</span>
-        <span className="font-mono text-[10px] tracking-wide text-ash">Hecho con precisión · México</span>
+        <span className="font-mono text-[10px] tracking-wide text-ash">© {new Date().getFullYear()} {siteConfig.name} — {siteConfig.tagline}</span>
+        <span className="font-mono text-[10px] tracking-wide text-ash">Hecho con precisión · {siteConfig.country}</span>
       </div>
     </footer>
   )

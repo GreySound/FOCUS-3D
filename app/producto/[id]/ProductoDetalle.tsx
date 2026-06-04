@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { siteConfig } from '@/lib/site-config'
 import type { Producto } from '@/lib/supabase'
 
 const ESTADO_LABEL = { disponible: 'Disponible', agotado: 'Agotado', bajo_pedido: 'Bajo pedido' }
@@ -105,11 +106,11 @@ export default function ProductoDetalle({ producto: p, relacionados }: { product
             <div className="flex flex-col gap-3">
               {p.estado !== 'agotado' ? (
                 <>
-                  <a href="https://www.mercadolibre.com.mx" target="_blank" rel="noopener noreferrer"
+                  <a href={siteConfig.social.mercadoLibre.url} target="_blank" rel="noopener noreferrer"
                     className="w-full text-center bg-[#ffe600] text-[#333] font-mono text-[11px] tracking-[3px] uppercase py-4 hover:bg-yellow-300 transition-colors font-medium">
                     Comprar en Mercado Libre
                   </a>
-                  <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer"
+                  <a href={siteConfig.social.instagram.url} target="_blank" rel="noopener noreferrer"
                     className="w-full text-center bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white font-mono text-[11px] tracking-[3px] uppercase py-4 hover:opacity-90 transition-opacity">
                     Pedir por Instagram
                   </a>

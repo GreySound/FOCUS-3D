@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
+import { marcarMensajeLeido } from '@/lib/admin-actions'
 import { useRouter } from 'next/navigation'
 
 export default function MarcarLeidoBtn({ id }: { id: string }) {
@@ -9,8 +9,7 @@ export default function MarcarLeidoBtn({ id }: { id: string }) {
 
   const marcar = async () => {
     setLoading(true)
-    const supabase = createClient()
-    await supabase.from('mensajes').update({ leido: true }).eq('id', id)
+    await marcarMensajeLeido(id)
     router.refresh()
   }
 

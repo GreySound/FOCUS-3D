@@ -1,10 +1,10 @@
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import type { Mensaje } from '@/lib/supabase'
 import MarcarLeidoBtn from './MarcarLeidoBtn'
 import EliminarMensajeBtn from './EliminarMensajeBtn'
 
 export default async function AdminMensajes() {
-  const supabase = await createServerSupabaseClient()
+  const supabase = createAdminSupabaseClient()
   const { data: mensajes } = await supabase
     .from('mensajes')
     .select('*')
