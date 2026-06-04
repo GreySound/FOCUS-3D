@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash } from 'crypto'
+import { createSessionToken, ADMIN_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/auth'
 
 // Intentos fallidos en memoria (se resetea al reiniciar el servidor)
 // Para producción real usar Redis o Supabase, pero esto es suficiente para una tienda pequeña
@@ -12,10 +12,6 @@ function getClientIP(req: NextRequest): string {
   return req.headers.get('x-forwarded-for')?.split(',')[0] ?? 
          req.headers.get('x-real-ip') ?? 
          'unknown'
-}
-
-function hashPassword(pw: string): string {
-  return createHash('sha256').update(pw + 'focus3d_salt').digest('hex')
 }
 
 export async function POST(req: NextRequest) {
@@ -60,17 +56,15 @@ export async function POST(req: NextRequest) {
   // Contraseña correcta — limpiar intentos
   delete failedAttempts[ip]
 
-  // Guardar hash en cookie, no la contraseña directa
-  const tokenValue = hashPassword(process.env.ADMIN_PASSWORD!)
-
+  // Token de sesión firmado y con expiración (no un hash estático del password)
   const res = NextResponse.json({ ok: true })
   res.cookies.set({
-    name: 'admin_auth',
-    value: tokenValue,
+    name: ADMIN_COOKIE_NAME,
+    value: createSessionToken(),
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: SESSION_MAX_AGE,
     path: '/',
   })
   return res
@@ -80,7 +74,7 @@ export async function DELETE() {
   // Cerrar sesión
   const res = NextResponse.json({ ok: true })
   res.cookies.set({
-    name: 'admin_auth',
+    name: ADMIN_COOKIE_NAME,
     value: '',
     httpOnly: true,
     maxAge: 0,

@@ -1,7 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { createClient, type Producto } from '@/lib/supabase'
+import { type Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/upload-action'
+import { saveProducto } from '@/lib/admin-actions'
 import { useRouter } from 'next/navigation'
 
 const LINEAS = ['Essentials', 'Statement', 'Signature', 'Custom', 'B2B']
@@ -59,12 +60,8 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
     e.preventDefault()
     setSaving(true)
     setError('')
-    const supabase = createClient()
-    const payload = { ...form, imagenes: images }
-    const { error: saveErr } = isEdit
-      ? await supabase.from('productos').update(payload).eq('id', producto.id)
-      : await supabase.from('productos').insert([payload])
-    if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    const result = await saveProducto({ ...form, imagenes: images }, isEdit ? producto.id : undefined)
+    if (!result.ok) { setError(result.error ?? 'Error al guardar'); setSaving(false); return }
     router.push('/admin/productos')
     router.refresh()
   }

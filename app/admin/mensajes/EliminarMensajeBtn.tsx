@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
+import { eliminarMensaje } from '@/lib/admin-actions'
 import { useRouter } from 'next/navigation'
 
 export default function EliminarMensajeBtn({ id }: { id: string }) {
@@ -10,8 +10,7 @@ export default function EliminarMensajeBtn({ id }: { id: string }) {
 
   const handleDelete = async () => {
     setLoading(true)
-    const supabase = createClient()
-    await supabase.from('mensajes').delete().eq('id', id)
+    await eliminarMensaje(id)
     router.refresh()
   }
 

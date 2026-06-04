@@ -64,29 +64,47 @@ create trigger productos_updated_at
   before update on productos
   for each row execute function update_updated_at();
 
+-- ════════════════════════════════════════════
 -- Storage bucket para imágenes de productos
+-- ════════════════════════════════════════════
 insert into storage.buckets (id, name, public)
 values ('productos', 'productos', true)
 on conflict do nothing;
 
--- Política: lectura pública de imágenes
+-- Lectura pública de imágenes (la tienda las muestra).
 create policy "Imágenes públicas" on storage.objects
   for select using (bucket_id = 'productos');
 
--- Política: solo admin puede subir/borrar
-create policy "Admin upload" on storage.objects
-  for insert with check (bucket_id = 'productos');
+-- ⚠️ La subida/borrado de imágenes se hace SOLO desde el servidor con la
+-- SERVICE ROLE KEY (que ignora RLS). Por eso NO se crean políticas públicas
+-- de insert/delete: así ningún visitante puede subir ni borrar archivos.
+-- Si tu base ya tenía estas políticas permisivas, elimínalas:
+drop policy if exists "Admin upload" on storage.objects;
+drop policy if exists "Admin delete" on storage.objects;
 
-create policy "Admin delete" on storage.objects
-  for delete using (bucket_id = 'productos');
-
--- RLS: tablas públicas de solo lectura para la tienda
+-- ════════════════════════════════════════════
+-- Row Level Security (RLS)
+-- ════════════════════════════════════════════
 alter table productos enable row level security;
 alter table pedidos enable row level security;
 alter table pedido_items enable row level security;
 alter table mensajes enable row level security;
 
+-- Catálogo: lectura pública (lo muestra la tienda).
 create policy "Productos públicos" on productos for select using (true);
+
+-- Formulario de contacto: cualquiera puede ENVIAR un mensaje...
 create policy "Insertar mensajes" on mensajes for insert with check (true);
-create policy "Insertar pedidos" on pedidos for insert with check (true);
-create policy "Insertar items" on pedido_items for insert with check (true);
+
+-- ⚠️ ...pero NADIE puede leer/editar/borrar mensajes ni pedidos con la clave
+-- pública: contienen datos personales de clientes (nombre, email, teléfono).
+-- El panel admin los lee y modifica DESDE EL SERVIDOR con la SERVICE ROLE KEY
+-- (que ignora RLS). Por eso 'pedidos', 'pedido_items' y la lectura/escritura
+-- de 'mensajes' NO tienen políticas públicas.
+--
+-- Si tu base ya tenía políticas permisivas que exponían estos datos,
+-- elimínalas para cerrar la fuga (ajusta los nombres si difieren):
+drop policy if exists "Pedidos públicos" on pedidos;
+drop policy if exists "Mensajes públicos" on mensajes;
+drop policy if exists "Insertar pedidos" on pedidos;
+drop policy if exists "Insertar items" on pedido_items;

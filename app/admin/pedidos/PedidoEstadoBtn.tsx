@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
+import { updatePedidoEstado } from '@/lib/admin-actions'
 import { useRouter } from 'next/navigation'
 
 const SIGUIENTE: Record<string, string> = {
@@ -14,8 +14,7 @@ export default function PedidoEstadoBtn({ id, estadoActual }: { id: string; esta
 
   const avanzar = async () => {
     setLoading(true)
-    const supabase = createClient()
-    await supabase.from('pedidos').update({ estado: SIGUIENTE[estadoActual] }).eq('id', id)
+    await updatePedidoEstado(id, SIGUIENTE[estadoActual])
     router.refresh()
     setLoading(false)
   }
