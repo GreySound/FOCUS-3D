@@ -14,8 +14,9 @@ export default function Navbar() {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 px-6 md:px-16 h-[72px] flex items-center justify-between transition-all duration-300 ${scrolled ? 'bg-carbon/95 backdrop-blur-sm border-b border-stone/10' : ''}`}>
-      <Link href="/" className="font-serif text-xl font-bold tracking-widest uppercase text-pearl">
-        Focus <span className="text-gold italic font-light">3D</span>
+      <Link href="/" className="flex items-center gap-2.5 font-serif text-xl font-bold tracking-widest uppercase text-pearl">
+        <img src="/branding/logo-mark.svg" alt="" aria-hidden="true" className="w-7 h-7" />
+        <span>Focus <span className="text-gold italic font-light">3D</span></span>
       </Link>
 
       {/* Desktop */}

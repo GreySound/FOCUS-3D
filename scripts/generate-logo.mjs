@@ -72,5 +72,7 @@ mkdirSync('public/branding', { recursive: true })
 writeFileSync('public/branding/logo-mark.svg', markSvg)
 writeFileSync('public/branding/favicon-preview.svg', iconSvg)
 writeFileSync('public/branding/logo-lockup.svg', lockupSvg)
-console.log('OK -> public/branding/{logo-mark,favicon-preview,logo-lockup}.svg')
+// Favicon oficial de la app (Next.js usa app/icon.svg).
+writeFileSync('app/icon.svg', iconSvg)
+console.log('OK -> public/branding/{logo-mark,favicon-preview,logo-lockup}.svg + app/icon.svg')
 console.log('cube lines:', cube.length, '| star lines:', star.length, '| R:', R, '| n:', n)
