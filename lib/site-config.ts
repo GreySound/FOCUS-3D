@@ -41,7 +41,9 @@ export const siteConfig = {
 } as const
 
 // Arma un enlace de WhatsApp con un mensaje opcional prellenado.
+// Usa el dominio wa.me y deja solo dígitos en el número (evita el "not_found" de WhatsApp).
 export function whatsappLink(message?: string): string {
-  const base = `https://wa.me/${siteConfig.contact.whatsappNumber}`
+  const num = siteConfig.contact.whatsappNumber.replace(/\D/g, '')
+  const base = `https://wa.me/${num}`
   return message ? `${base}?text=${encodeURIComponent(message)}` : base
 }
