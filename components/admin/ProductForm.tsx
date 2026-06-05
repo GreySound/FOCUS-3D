@@ -64,7 +64,12 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
     e.preventDefault()
     setSaving(true)
     setError('')
-    const result = await saveProducto({ ...form, imagenes: images }, isEdit ? producto.id : undefined)
+    const payload = {
+      ...form,
+      imagenes: images,
+      precio_promo: form.precio_promo === '' ? null : Number(form.precio_promo),
+    }
+    const result = await saveProducto(payload, isEdit ? producto.id : undefined)
     if (!result.ok) { setError(result.error ?? 'Error al guardar'); setSaving(false); return }
     router.push('/admin/productos')
     router.refresh()
