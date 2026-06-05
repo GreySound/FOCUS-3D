@@ -2,13 +2,15 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
+import ClassicalBackdrop from '@/components/ClassicalBackdrop'
+import NewsletterSignup from '@/components/NewsletterSignup'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/site-config'
 import type { Producto } from '@/lib/supabase'
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient()
-  const { data: productos } = await supabase
+  const { data: productos, error } = await supabase
     .from('productos')
     .select('*')
     .eq('estado', 'disponible')
@@ -120,7 +122,11 @@ export default async function Home() {
           </div>
           <Link href="/catalogo" className="btn-ghost">Ver todo el catálogo</Link>
         </div>
-        {productos && productos.length > 0 ? (
+        {error ? (
+          <div className="text-center py-24 text-ash font-light italic font-serif text-xl">
+            No pudimos cargar las piezas en este momento. Intenta recargar la página.
+          </div>
+        ) : productos && productos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0.5 bg-stone/10">
             {(productos as Producto[]).map(p => <ProductCard key={p.id} p={p} />)}
           </div>
@@ -179,9 +185,23 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── CUPÓN DE BIENVENIDA ── */}
+      <section className="relative bg-ink px-6 md:px-16 py-24 md:py-32 overflow-hidden">
+        <ClassicalBackdrop />
+        <div className="relative z-10 max-w-xl mx-auto text-center">
+          <div className="section-tag mb-5">Cupón de bienvenida</div>
+          <h2 className="section-title mb-5">10% en tu<br /><em className="text-gold">primera pieza.</em></h2>
+          <p className="text-marble font-light leading-relaxed mb-10">
+            Suscríbete con tu WhatsApp y recibe tu cupón del 10%. Además serás el primero
+            en enterarte de nuevos lanzamientos y promociones.
+          </p>
+          <div className="max-w-sm mx-auto text-left">
+            <NewsletterSignup />
+          </div>
+        </div>
+      </section>
+
       <Footer />
-
-
     </>
   )
 }

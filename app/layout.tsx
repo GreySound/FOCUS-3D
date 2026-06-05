@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { siteConfig } from '@/lib/site-config'
+import NewsletterPopup from '@/components/NewsletterPopup'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -51,7 +52,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <body className="bg-carbon text-pearl antialiased">{children}</body>
+      <body className="bg-carbon text-pearl antialiased">
+        {children}
+        <NewsletterPopup />
+      </body>
     </html>
   )
 }

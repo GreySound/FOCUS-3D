@@ -48,6 +48,19 @@ export type Mensaje = {
   created_at: string
 }
 
+export type Suscriptor = {
+  id: string
+  nombre: string
+  telefono: string
+  email: string | null
+  canal: string
+  token: string
+  cupon: string
+  estado: 'pendiente' | 'verificado'
+  acepta_promos: boolean
+  created_at: string
+}
+
 // ── Cliente para el NAVEGADOR (componentes 'use client') ───
 import { createBrowserClient } from '@supabase/ssr'
 

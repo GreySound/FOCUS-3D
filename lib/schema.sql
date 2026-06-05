@@ -108,3 +108,26 @@ drop policy if exists "Pedidos públicos" on pedidos;
 drop policy if exists "Mensajes públicos" on mensajes;
 drop policy if exists "Insertar pedidos" on pedidos;
 drop policy if exists "Insertar items" on pedido_items;
+
+
+
+-- ════════════════════════════════════════════
+-- Suscriptores (cupón de bienvenida + difusión)
+-- ════════════════════════════════════════════
+create table if not exists suscriptores (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null,
+  telefono text not null,                       -- WhatsApp normalizado (solo dígitos)
+  email text,
+  canal text not null default 'whatsapp',
+  token text not null unique,                   -- código de registro que el cliente envía por WhatsApp
+  cupon text not null,                          -- cupón único 10% (lo entrega el admin por WhatsApp)
+  estado text not null default 'pendiente',     -- pendiente | verificado
+  acepta_promos boolean not null default true,  -- consentimiento (LFPDPPP)
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_suscriptores_telefono on suscriptores(telefono);
+
+-- Datos personales: el alta y la gestión se hacen SOLO desde el servidor con la
+-- service role key. Sin políticas públicas, la clave anónima no puede leerlos.
+alter table suscriptores enable row level security;
