@@ -117,7 +117,7 @@ drop policy if exists "Insertar items" on pedido_items;
 create table if not exists suscriptores (
   id uuid primary key default gen_random_uuid(),
   nombre text not null,
-  telefono text not null,                       -- WhatsApp normalizado (solo dígitos)
+  telefono text not null unique,                -- WhatsApp normalizado (52 + 10 dígitos). UNIQUE = 1 cupón por número
   email text,
   canal text not null default 'whatsapp',
   token text not null unique,                   -- código de registro que el cliente envía por WhatsApp
@@ -126,7 +126,7 @@ create table if not exists suscriptores (
   acepta_promos boolean not null default true,  -- consentimiento (LFPDPPP)
   created_at timestamptz not null default now()
 );
-create index if not exists idx_suscriptores_telefono on suscriptores(telefono);
+create unique index if not exists idx_suscriptores_telefono on suscriptores(telefono);
 
 -- Datos personales: el alta y la gestión se hacen SOLO desde el servidor con la
 -- service role key. Sin políticas públicas, la clave anónima no puede leerlos.

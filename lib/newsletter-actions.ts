@@ -15,6 +15,17 @@ function randCode(len: number): string {
   return s
 }
 
+// Normaliza un teléfono mexicano a un formato ÚNICO: lada 52 + 10 dígitos.
+// Así "6671923604", "16671923604" y "526671923604" cuentan como el MISMO número
+// y nadie puede pedir varios cupones cambiando el formato.
+function normalizarTelefono(raw: string): string | null {
+  let d = (raw ?? '').replace(/\D/g, '')
+  if (d.startsWith('52')) d = d.slice(2)   // quita lada de país si viene
+  if (d.startsWith('1') && d.length === 11) d = d.slice(1) // quita el "1" intermedio
+  if (d.length !== 10) return null         // un móvil mexicano son 10 dígitos
+  return `52${d}`
+}
+
 type Result = { ok: boolean; error?: string; whatsappUrl?: string; token?: string }
 
 export async function suscribir(input: {
@@ -31,15 +42,16 @@ export async function suscribir(input: {
   if (nombre.length < 2) return { ok: false, error: 'Ingresa tu nombre.' }
   if (!input.acepta) return { ok: false, error: 'Necesitas aceptar recibir promociones para obtener el cupón.' }
 
-  const telefono = (input.telefono ?? '').replace(/\D/g, '')
-  if (telefono.length < 10 || telefono.length > 13) {
+  const telefono = normalizarTelefono(input.telefono)
+  if (!telefono) {
     return { ok: false, error: 'Ingresa un número de WhatsApp válido (10 dígitos).' }
   }
   const email = (input.email ?? '').trim() || null
 
   const supabase = createAdminSupabaseClient()
 
-  // Si el teléfono ya estaba registrado, reutilizamos su token (no duplicamos).
+  // Anti-duplicado: si el teléfono (ya normalizado) existe, reutilizamos su token
+  // y cupón. La misma persona NUNCA obtiene un segundo cupón.
   const { data: existing } = await supabase
     .from('suscriptores')
     .select('token')
@@ -54,7 +66,20 @@ export async function suscribir(input: {
     const { error } = await supabase.from('suscriptores').insert([{
       nombre, telefono, email, canal: 'whatsapp', token, cupon, acepta_promos: true,
     }])
-    if (error) return { ok: false, error: 'No se pudo completar el registro. Intenta de nuevo.' }
+    if (error) {
+      // Si dos envíos casi simultáneos chocan con el índice único del teléfono,
+      // recuperamos el token ya existente en vez de fallar.
+      const { data: again } = await supabase
+        .from('suscriptores')
+        .select('token')
+        .eq('telefono', telefono)
+        .maybeSingle()
+      if (again?.token) {
+        token = again.token as string
+      } else {
+        return { ok: false, error: 'No se pudo completar el registro. Intenta de nuevo.' }
+      }
+    }
   }
 
   // El cliente abre WhatsApp con este mensaje hacia el negocio. Cuando lo envía,
