@@ -10,6 +10,11 @@ export default function ProductCard({ p }: { p: Producto }) {
     <Link href={`/producto/${p.id}`} className="card-product group block">
       {/* Imagen */}
       <div className="aspect-square bg-carbon relative overflow-hidden">
+        {p.en_promocion && (
+          <span className="absolute top-3 left-3 z-10 bg-gold text-carbon font-mono text-[9px] tracking-[2px] uppercase px-2.5 py-1">
+            {p.promo_etiqueta || 'Promoción'}
+          </span>
+        )}
         {p.imagenes?.[0] ? (
           <Image
             src={p.imagenes[0]}
@@ -43,9 +48,16 @@ export default function ProductCard({ p }: { p: Producto }) {
           <p className="text-stone text-sm font-light leading-relaxed mb-3 line-clamp-2">{p.descripcion}</p>
         )}
         <div className="flex justify-between items-center">
-          <span className="font-mono text-sm text-pearl">
-            ${p.precio_min.toLocaleString()} – ${p.precio_max.toLocaleString()} MXN
-          </span>
+          {p.en_promocion && p.precio_promo ? (
+            <span className="font-mono text-sm">
+              <span className="text-ash line-through mr-2">${p.precio_min.toLocaleString()}</span>
+              <span className="text-gold">${p.precio_promo.toLocaleString()} MXN</span>
+            </span>
+          ) : (
+            <span className="font-mono text-sm text-pearl">
+              ${p.precio_min.toLocaleString()} – ${p.precio_max.toLocaleString()} MXN
+            </span>
+          )}
           <span className={`font-mono text-[9px] tracking-wide uppercase ${estadoColor[p.estado]}`}>
             {estadoLabel[p.estado]}
           </span>

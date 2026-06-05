@@ -21,6 +21,9 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
     precio_max: producto?.precio_max ?? 800,
     stock: producto?.stock ?? 5,
     estado: producto?.estado ?? 'disponible',
+    en_promocion: producto?.en_promocion ?? false,
+    precio_promo: producto?.precio_promo ?? ('' as number | ''),
+    promo_etiqueta: producto?.promo_etiqueta ?? '',
   })
   const [images, setImages] = useState<string[]>(producto?.imagenes ?? [])
   const [uploading, setUploading] = useState(false)
@@ -103,6 +106,49 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
           <label className="font-mono text-[9px] tracking-[3px] uppercase text-ash">Unidades disponibles</label>
           <input type="number" value={form.stock} onChange={set('stock')} min={0} className="input-field" />
         </div>
+      </div>
+
+      {/* Promoción */}
+      <div className="flex flex-col gap-4 border border-gold/20 bg-gold/[0.03] p-5">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.en_promocion}
+            onChange={e => setForm(f => ({ ...f, en_promocion: e.target.checked }))}
+            className="accent-gold w-4 h-4"
+          />
+          <span className="font-mono text-[10px] tracking-[2px] uppercase text-gold">Marcar como promoción</span>
+        </label>
+
+        {form.en_promocion && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[9px] tracking-[3px] uppercase text-ash">Precio promo (MXN, opcional)</label>
+              <input
+                type="number"
+                value={form.precio_promo}
+                onChange={e => setForm(f => ({ ...f, precio_promo: e.target.value === '' ? '' : Number(e.target.value) }))}
+                min={0}
+                placeholder="Menor al precio mínimo"
+                className="input-field"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[9px] tracking-[3px] uppercase text-ash">Etiqueta (opcional)</label>
+              <input
+                type="text"
+                value={form.promo_etiqueta}
+                onChange={e => setForm(f => ({ ...f, promo_etiqueta: e.target.value }))}
+                maxLength={40}
+                placeholder='Ej: "-20%", "2x1", "Edición especial"'
+                className="input-field"
+              />
+            </div>
+            <p className="md:col-span-2 text-ash font-light text-[11px]">
+              La pieza se destacará con una insignia dorada en la tienda. (A futuro: avisar a los suscriptores por WhatsApp.)
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Imágenes */}

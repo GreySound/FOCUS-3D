@@ -14,9 +14,17 @@ create table if not exists productos (
   stock int default 5,
   estado text default 'disponible' check (estado in ('disponible','agotado','bajo_pedido')),
   imagenes text[] default '{}',
+  en_promocion boolean not null default false,   -- destacar como promoción en la tienda
+  precio_promo int,                              -- precio rebajado opcional (si null, solo se marca como promo)
+  promo_etiqueta text,                           -- texto corto de la promo (ej. "-20%", "2x1")
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Si la tabla productos ya existía, añade las columnas de promoción:
+alter table productos add column if not exists en_promocion boolean not null default false;
+alter table productos add column if not exists precio_promo int;
+alter table productos add column if not exists promo_etiqueta text;
 
 -- Pedidos
 create table if not exists pedidos (

@@ -30,6 +30,9 @@ export async function saveProducto(
     stock: number
     estado: string
     imagenes: string[]
+    en_promocion?: boolean
+    precio_promo?: number | null
+    promo_etiqueta?: string
   },
   id?: string
 ): Promise<Result> {
@@ -54,6 +57,16 @@ export async function saveProducto(
     ? input.imagenes.filter(u => typeof u === 'string')
     : []
 
+  // ── Promoción ──
+  const en_promocion = !!input.en_promocion
+  let precio_promo: number | null = null
+  if (input.precio_promo != null && `${input.precio_promo}` !== '') {
+    precio_promo = Number(input.precio_promo)
+    if (!Number.isFinite(precio_promo) || precio_promo < 0) return { ok: false, error: 'Precio de promoción inválido' }
+    if (precio_promo >= precio_min) return { ok: false, error: 'El precio de promoción debe ser menor al precio mínimo' }
+  }
+  const promo_etiqueta = (input.promo_etiqueta ?? '').trim().slice(0, 40) || null
+
   const payload = {
     nombre,
     descripcion: (input.descripcion ?? '').trim() || null,
@@ -63,6 +76,9 @@ export async function saveProducto(
     stock,
     estado: input.estado,
     imagenes,
+    en_promocion,
+    precio_promo: en_promocion ? precio_promo : null,
+    promo_etiqueta: en_promocion ? promo_etiqueta : null,
   }
 
   const supabase = createAdminSupabaseClient()
@@ -74,6 +90,7 @@ export async function saveProducto(
 
   revalidatePath('/admin/productos')
   revalidatePath('/catalogo')
+  revalidatePath('/')
   return { ok: true }
 }
 

@@ -9,6 +9,9 @@ export type Producto = {
   stock: number
   estado: 'disponible' | 'agotado' | 'bajo_pedido'
   imagenes: string[]
+  en_promocion: boolean
+  precio_promo: number | null
+  promo_etiqueta: string | null
   created_at: string
   updated_at: string
 }
