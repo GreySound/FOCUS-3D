@@ -21,9 +21,9 @@ export const siteConfig = {
   contact: {
     email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@focus3d.art',
     // Teléfono visible (formato libre).
-    phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '+52 1 (XX) XXXX-XXXX',
-    // WhatsApp en formato internacional, SOLO dígitos (ej. 5216671234567).
-    whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '521XXXXXXXXXX',
+    phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '+52 667 192 3604',
+    // WhatsApp en formato internacional, SOLO dígitos (lada 52 + 10 dígitos).
+    whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '526671923604',
     responseTime: 'Menos de 2 horas en horario hábil',
     shipping: 'Todo México · 3–7 días hábiles',
   },
