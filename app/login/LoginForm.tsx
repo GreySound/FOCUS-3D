@@ -11,19 +11,26 @@ export default function LoginForm() {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/admin/login', {
-      method: 'POST',
-      body: JSON.stringify({ password: pw }),
-      headers: { 'Content-Type': 'application/json' },
-    })
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        body: JSON.stringify({ password: pw }),
+        headers: { 'Content-Type': 'application/json' },
+      })
 
-    const data = await res.json()
+      const data = await res.json()
 
-    if (res.ok) {
-      window.location.href = '/admin'
-    } else {
-      setError(data.error ?? 'Error desconocido')
-      setPw('')
+      if (res.ok) {
+        // Redirigir al panel — el setLoading no se cancela intencionalmente
+        // para que el botón no vuelva a habilitarse durante la navegación.
+        window.location.replace('/admin')
+      } else {
+        setError(data.error ?? 'Error desconocido')
+        setPw('')
+        setLoading(false)
+      }
+    } catch {
+      setError('Error de conexión. Intenta de nuevo.')
       setLoading(false)
     }
   }
@@ -40,7 +47,8 @@ export default function LoginForm() {
           onChange={e => setPw(e.target.value)}
           placeholder="••••••••"
           required
-          autoComplete="current-password"
+          autoComplete="off"
+          data-form-type="other"
           className="input-field text-lg tracking-widest"
         />
       </div>
