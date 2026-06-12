@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Producto } from '@/lib/supabase'
 import DeleteProductBtn from './DeleteProductBtn'
+import NotificarPromoBtn from './NotificarPromoBtn'
 
 export default async function AdminProductos() {
   const supabase = await createServerSupabaseClient()
@@ -38,9 +39,15 @@ export default async function AdminProductos() {
                   <span className="font-mono text-[9px] tracking-wide uppercase text-gold">{p.linea}</span>
                   <span className={`font-mono text-[9px] tracking-wide uppercase ${estadoColor[p.estado]}`}>{p.estado}</span>
                   <span className="font-mono text-[9px] text-ash">${p.precio_min.toLocaleString()}–${p.precio_max.toLocaleString()}</span>
+                  {p.en_promocion && (
+                    <span className="font-mono text-[9px] tracking-wide uppercase text-gold border border-gold/40 px-1.5 py-0.5">
+                      {p.promo_etiqueta || 'Promo'}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
+                {p.en_promocion && <NotificarPromoBtn id={p.id} />}
                 <Link href={`/admin/productos/${p.id}`}
                   className="font-mono text-[9px] tracking-[2px] uppercase text-stone hover:text-pearl border border-stone/20 hover:border-stone/50 px-3 py-2 transition-all">
                   Editar

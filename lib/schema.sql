@@ -25,6 +25,8 @@ create table if not exists productos (
 alter table productos add column if not exists en_promocion boolean not null default false;
 alter table productos add column if not exists precio_promo int;
 alter table productos add column if not exists promo_etiqueta text;
+-- (opcional) registra cuándo se avisó la promo a los suscriptores por WhatsApp:
+alter table productos add column if not exists promo_notificada_at timestamptz;
 
 -- Pedidos
 create table if not exists pedidos (
