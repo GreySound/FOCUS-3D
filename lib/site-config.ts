@@ -29,6 +29,8 @@ export const siteConfig = {
   },
 
   social: {
+    // Instagram del negocio. Cuando tengas la cuenta nueva, define
+    // NEXT_PUBLIC_INSTAGRAM_URL (y actualiza el handle visible aquí).
     instagram: {
       handle: '@focus3d.art',
       url: process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://www.instagram.com/focus3d.art',
@@ -36,6 +38,12 @@ export const siteConfig = {
     mercadoLibre: {
       label: 'Focus 3D — Tienda Oficial',
       url: process.env.NEXT_PUBLIC_MERCADOLIBRE_URL || 'https://www.mercadolibre.com.mx',
+    },
+    // Mercado Pago: tu link de cobro/perfil. Pega tu enlace en
+    // NEXT_PUBLIC_MERCADOPAGO_URL (ej. https://mpago.la/xxxx o tu link.mercadopago.com).
+    mercadoPago: {
+      label: 'Pagar con Mercado Pago',
+      url: process.env.NEXT_PUBLIC_MERCADOPAGO_URL || 'https://www.mercadopago.com.mx',
     },
   },
 } as const
