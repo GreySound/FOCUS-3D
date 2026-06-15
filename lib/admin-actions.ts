@@ -7,6 +7,8 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminSupabaseClient } from './supabase-admin'
 import { isAdminAuthenticated } from './auth'
+import { isWhatsappConfigured, sendTemplateMessage } from './whatsapp'
+import { siteConfig } from './site-config'
 
 const LINEAS = ['Essentials', 'Statement', 'Signature', 'Custom', 'B2B']
 const ESTADOS_PRODUCTO = ['disponible', 'agotado', 'bajo_pedido']
@@ -106,6 +108,99 @@ export async function deleteProducto(id: string): Promise<Result> {
   revalidatePath('/admin/productos')
   revalidatePath('/catalogo')
   return { ok: true }
+}
+
+// ── Difusión de promoción por WhatsApp ─────────────────────
+// Envía una plantilla aprobada a los suscriptores que aceptan promociones.
+// Es una acción DELIBERADA (botón en el admin), no automática: cada mensaje
+// de marketing tiene costo y WhatsApp exige plantilla pre-aprobada + opt-in.
+type NotificarResult = Result & {
+  resumen?: { enviados: number; fallidos: number; total: number; errores: string[] }
+}
+
+export async function notificarPromocionSuscriptores(
+  productId: string
+): Promise<NotificarResult> {
+  const denied = await ensureAdmin()
+  if (denied) return denied
+  if (!productId) return { ok: false, error: 'ID requerido' }
+
+  if (!isWhatsappConfigured()) {
+    return {
+      ok: false,
+      error:
+        'La API de WhatsApp aún no está configurada. Define WHATSAPP_ACCESS_TOKEN y WHATSAPP_PHONE_NUMBER_ID en el servidor.',
+    }
+  }
+
+  const supabase = createAdminSupabaseClient()
+
+  const { data: producto, error: pErr } = await supabase
+    .from('productos')
+    .select('*')
+    .eq('id', productId)
+    .maybeSingle()
+  if (pErr || !producto) return { ok: false, error: 'Producto no encontrado' }
+  if (!producto.en_promocion) {
+    return { ok: false, error: 'Este producto no está marcado como promoción.' }
+  }
+
+  // Solo suscriptores con consentimiento de promociones (LFPDPPP / opt-in).
+  const { data: subs, error: sErr } = await supabase
+    .from('suscriptores')
+    .select('telefono, acepta_promos')
+    .eq('acepta_promos', true)
+  if (sErr) return { ok: false, error: sErr.message }
+
+  const destinatarios = (subs ?? []).filter((s) => s.acepta_promos && s.telefono)
+  if (destinatarios.length === 0) {
+    return { ok: false, error: 'No hay suscriptores que acepten promociones.' }
+  }
+
+  // Variables de la plantilla: {{1}} nombre, {{2}} oferta, {{3}} enlace.
+  const etiqueta = producto.promo_etiqueta || 'Promoción'
+  const precio =
+    producto.precio_promo != null
+      ? `$${producto.precio_promo.toLocaleString('es-MX')}`
+      : `desde $${producto.precio_min.toLocaleString('es-MX')}`
+  const url = `${siteConfig.url}/producto/${producto.id}`
+
+  let enviados = 0
+  let fallidos = 0
+  const errores: string[] = []
+
+  // Envío secuencial: respeta los límites de velocidad de la Cloud API.
+  for (const s of destinatarios) {
+    const r = await sendTemplateMessage({
+      to: s.telefono,
+      bodyParams: [producto.nombre, `${etiqueta} · ${precio}`, url],
+    })
+    if (r.ok) {
+      enviados++
+    } else {
+      fallidos++
+      if (r.error && errores.length < 3) errores.push(r.error)
+    }
+  }
+
+  // Registra cuándo se notificó (best-effort: si la columna no existe, se ignora).
+  try {
+    await supabase
+      .from('productos')
+      .update({ promo_notificada_at: new Date().toISOString() })
+      .eq('id', productId)
+  } catch {
+    /* columna opcional; no es crítico */
+  }
+
+  return {
+    ok: enviados > 0,
+    error:
+      enviados === 0
+        ? `No se pudo enviar a ningún suscriptor. ${errores[0] ?? ''}`.trim()
+        : undefined,
+    resumen: { enviados, fallidos, total: destinatarios.length, errores },
+  }
 }
 
 // ── Pedidos ────────────────────────────────────────────────
