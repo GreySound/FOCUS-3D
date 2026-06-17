@@ -8,7 +8,6 @@ import { revalidatePath } from 'next/cache'
 import { createAdminSupabaseClient } from './supabase-admin'
 import { isAdminAuthenticated } from './auth'
 import { isWhatsappConfigured, sendTemplateMessage } from './whatsapp'
-import { siteConfig } from './site-config'
 
 const LINEAS = ['Essentials', 'Statement', 'Signature', 'Custom', 'B2B']
 const ESTADOS_PRODUCTO = ['disponible', 'agotado', 'bajo_pedido']
@@ -144,6 +143,14 @@ export async function notificarPromocionSuscriptores(
   if (!producto.en_promocion) {
     return { ok: false, error: 'Este producto no está marcado como promoción.' }
   }
+  // La plantilla incluye imagen de encabezado: el producto necesita al menos una foto.
+  const headerImageUrl: string | undefined = producto.imagenes?.[0]
+  if (!headerImageUrl) {
+    return {
+      ok: false,
+      error: 'El producto no tiene imagen. Agrega al menos una foto para enviar la promo (la plantilla incluye imagen).',
+    }
+  }
 
   // Solo suscriptores con consentimiento de promociones (LFPDPPP / opt-in).
   const { data: subs, error: sErr } = await supabase
@@ -157,13 +164,17 @@ export async function notificarPromocionSuscriptores(
     return { ok: false, error: 'No hay suscriptores que acepten promociones.' }
   }
 
-  // Variables de la plantilla: {{1}} nombre, {{2}} oferta, {{3}} enlace.
+  // Variables de la plantilla:
+  //   header  → imagen del producto (headerImageUrl)
+  //   {{1}}   → nombre del producto
+  //   {{2}}   → oferta (etiqueta + precio promo)
+  //   botón   → id del producto, que se anexa a la URL base de la plantilla
+  //             (https://focus3d.art/producto/{{1}})
   const etiqueta = producto.promo_etiqueta || 'Promoción'
   const precio =
     producto.precio_promo != null
       ? `$${producto.precio_promo.toLocaleString('es-MX')}`
       : `desde $${producto.precio_min.toLocaleString('es-MX')}`
-  const url = `${siteConfig.url}/producto/${producto.id}`
 
   let enviados = 0
   let fallidos = 0
@@ -173,7 +184,9 @@ export async function notificarPromocionSuscriptores(
   for (const s of destinatarios) {
     const r = await sendTemplateMessage({
       to: s.telefono,
-      bodyParams: [producto.nombre, `${etiqueta} · ${precio}`, url],
+      headerImageUrl,
+      bodyParams: [producto.nombre, `${etiqueta} · ${precio}`],
+      buttonUrlParam: producto.id,
     })
     if (r.ok) {
       enviados++

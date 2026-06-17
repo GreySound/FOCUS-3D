@@ -36,27 +36,50 @@ export function isWhatsappConfigured(): boolean {
 type SendResult = { ok: boolean; error?: string; id?: string }
 
 // Envía un mensaje de plantilla a un número (formato internacional, solo dígitos).
-// `bodyParams` rellena las variables {{1}}, {{2}}, ... del cuerpo de la plantilla.
+// Soporta los 3 componentes de una plantilla de promoción:
+//   - headerImageUrl : imagen del encabezado (URL pública del producto)
+//   - bodyParams     : variables {{1}}, {{2}}, ... del cuerpo
+//   - buttonUrlParam : sufijo dinámico del botón URL (índice 0), ej. el id
+//                      del producto que se anexa a la URL base de la plantilla.
 export async function sendTemplateMessage(opts: {
   to: string
   template?: string
   lang?: string
   bodyParams?: string[]
+  headerImageUrl?: string
+  buttonUrlParam?: string
 }): Promise<SendResult> {
   const c = whatsappConfig()
   if (!c.token || !c.phoneNumberId) {
     return { ok: false, error: 'WhatsApp API no configurada' }
   }
 
-  const components =
-    opts.bodyParams && opts.bodyParams.length > 0
-      ? [
-          {
-            type: 'body',
-            parameters: opts.bodyParams.map((text) => ({ type: 'text', text })),
-          },
-        ]
-      : undefined
+  // Los componentes deben enviarse en el MISMO orden y forma que define la
+  // plantilla aprobada en Meta (encabezado → cuerpo → botón).
+  const components: Array<Record<string, unknown>> = []
+
+  if (opts.headerImageUrl) {
+    components.push({
+      type: 'header',
+      parameters: [{ type: 'image', image: { link: opts.headerImageUrl } }],
+    })
+  }
+
+  if (opts.bodyParams && opts.bodyParams.length > 0) {
+    components.push({
+      type: 'body',
+      parameters: opts.bodyParams.map((text) => ({ type: 'text', text })),
+    })
+  }
+
+  if (opts.buttonUrlParam) {
+    components.push({
+      type: 'button',
+      sub_type: 'url',
+      index: '0',
+      parameters: [{ type: 'text', text: opts.buttonUrlParam }],
+    })
+  }
 
   const payload = {
     messaging_product: 'whatsapp',
@@ -65,7 +88,7 @@ export async function sendTemplateMessage(opts: {
     template: {
       name: opts.template || c.template,
       language: { code: opts.lang || c.lang },
-      ...(components ? { components } : {}),
+      ...(components.length > 0 ? { components } : {}),
     },
   }
 
