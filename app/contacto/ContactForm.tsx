@@ -1,10 +1,39 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 
-export default function ContactForm() {
+type Props = {
+  productoId?: string
+  productoNombre?: string
+  motivo?: string
+}
+
+// Arma el mensaje prellenado según el producto y el motivo (cotización o lista de espera).
+function mensajeInicial(nombre?: string, motivo?: string): string {
+  if (!nombre) return ''
+  if (motivo === 'espera') {
+    return `Hola, la pieza «${nombre}» aparece como agotada. Me gustaría que me avisen cuando vuelva a estar disponible / entrar a la lista de espera.`
+  }
+  return `Hola, me interesa la pieza «${nombre}». ¿Me pueden compartir una cotización con disponibilidad, acabados y tiempo de entrega?`
+}
+
+export default function ContactForm({ productoId, productoNombre, motivo }: Props) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle')
-  const [form, setForm] = useState({ nombre: '', email: '', telefono: '', interes: '', mensaje: '' })
+  const [producto, setProducto] = useState(
+    productoId && productoNombre ? { id: productoId, nombre: productoNombre } : null
+  )
+  const [form, setForm] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+    interes: productoNombre
+      ? motivo === 'espera'
+        ? 'Lista de espera'
+        : 'Cotización de pieza'
+      : '',
+    mensaje: mensajeInicial(productoNombre, motivo),
+  })
   const [telError, setTelError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +50,10 @@ export default function ContactForm() {
 
     setStatus('sending')
     const supabase = createClient()
-    const { error } = await supabase.from('mensajes').insert([form])
+    // Si la cotización viene de una ficha de producto, guardamos la referencia
+    // para que el admin sepa de inmediato de qué pieza se trata.
+    const payload = { ...form, producto_ref: producto?.id ?? null }
+    const { error } = await supabase.from('mensajes').insert([payload])
     setStatus(error ? 'error' : 'ok')
   }
 
@@ -45,6 +77,25 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {producto && (
+        <div className="flex items-start justify-between gap-3 bg-ink border border-gold/30 p-4">
+          <div>
+            <div className="font-mono text-[9px] tracking-[2px] uppercase text-gold mb-1">
+              {motivo === 'espera' ? 'Lista de espera' : 'Cotización de'}
+            </div>
+            <div className="font-serif text-lg text-pearl leading-tight">{producto.nombre}</div>
+            <Link href={`/producto/${producto.id}`}
+              className="inline-block mt-1 font-mono text-[9px] tracking-wide uppercase text-stone hover:text-pearl transition-colors">
+              Ver pieza ›
+            </Link>
+          </div>
+          <button type="button" onClick={() => setProducto(null)}
+            title="Quitar referencia del producto"
+            className="font-mono text-[11px] text-ash hover:text-pearl transition-colors leading-none">
+            ✕
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="font-mono text-[9px] tracking-[2px] uppercase text-ash">Nombre *</label>
@@ -74,6 +125,9 @@ export default function ContactForm() {
         <label className="font-mono text-[9px] tracking-[2px] uppercase text-ash">¿Qué te interesa?</label>
         <select value={form.interes} onChange={set('interes')} className="input-field">
           <option value="">Selecciona una opción</option>
+          {(form.interes === 'Cotización de pieza' || form.interes === 'Lista de espera') && (
+            <option value={form.interes}>{form.interes}</option>
+          )}
           <option>Panel decorativo (Essentials)</option>
           <option>Pieza Statement / Signature</option>
           <option>Letras / apellido personalizado</option>
