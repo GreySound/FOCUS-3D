@@ -6,7 +6,12 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Contacto' }
 
-export default function ContactoPage() {
+export default async function ContactoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ producto?: string; nombre?: string; motivo?: string }>
+}) {
+  const { producto, nombre, motivo } = await searchParams
   return (
     <>
       <Navbar />
@@ -39,7 +44,7 @@ export default function ContactoPage() {
               </div>
             </div>
 
-            <ContactForm />
+            <ContactForm productoId={producto} productoNombre={nombre} motivo={motivo} />
           </div>
         </section>
       </div>

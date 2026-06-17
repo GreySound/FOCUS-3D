@@ -114,15 +114,16 @@ export default function ProductoDetalle({ producto: p, relacionados }: { product
                     className="w-full text-center bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white font-mono text-[11px] tracking-[3px] uppercase py-4 hover:opacity-90 transition-opacity">
                     Pedir por Instagram
                   </a>
-                  <Link href="/contacto"
+                  <Link href={`/contacto?producto=${p.id}&nombre=${encodeURIComponent(p.nombre)}`}
                     className="w-full text-center border border-stone/30 text-pearl font-mono text-[11px] tracking-[3px] uppercase py-4 hover:border-pearl transition-colors">
                     Solicitar cotización
                   </Link>
                 </>
               ) : (
-                <div className="w-full text-center bg-stone/10 text-ash font-mono text-[11px] tracking-[3px] uppercase py-4">
-                  Pieza agotada — contáctanos para lista de espera
-                </div>
+                <Link href={`/contacto?producto=${p.id}&nombre=${encodeURIComponent(p.nombre)}&motivo=espera`}
+                  className="w-full text-center bg-stone/10 text-ash font-mono text-[11px] tracking-[3px] uppercase py-4 hover:text-pearl hover:bg-stone/20 transition-colors">
+                  Pieza agotada — anótate en la lista de espera
+                </Link>
               )}
             </div>
 
