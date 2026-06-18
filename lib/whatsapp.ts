@@ -10,7 +10,9 @@
 //   WHATSAPP_PHONE_NUMBER_ID  ID del número emisor (lo da el panel de WhatsApp)
 //   WHATSAPP_API_VERSION      (opcional) versión de la Graph API, ej. v22.0
 //   WHATSAPP_PROMO_TEMPLATE   (opcional) nombre de la plantilla de promociones
-//   WHATSAPP_TEMPLATE_LANG    (opcional) idioma de la plantilla, ej. es_MX
+//   WHATSAPP_TEMPLATE_LANG    (opcional) idioma de la plantilla de promo, ej. es_MX
+//   WHATSAPP_CUPON_TEMPLATE   (opcional) nombre de la plantilla del cupón de bienvenida
+//   WHATSAPP_CUPON_LANG       (opcional) idioma de la plantilla del cupón, ej. es
 //
 // ⚠️ NUNCA importar este archivo desde un componente 'use client':
 //    solo desde server actions, server components o route handlers.
@@ -24,6 +26,9 @@ export function whatsappConfig() {
     version: process.env.WHATSAPP_API_VERSION || 'v22.0',
     template: process.env.WHATSAPP_PROMO_TEMPLATE || 'promo_focus3d',
     lang: process.env.WHATSAPP_TEMPLATE_LANG || 'es_MX',
+    // Plantilla del cupón de bienvenida (la que enviaste a revisión).
+    cuponTemplate: process.env.WHATSAPP_CUPON_TEMPLATE || 'disbursement_voucher_1',
+    cuponLang: process.env.WHATSAPP_CUPON_LANG || 'es',
   }
 }
 
@@ -109,4 +114,20 @@ export async function sendTemplateMessage(opts: {
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Error de red' }
   }
+}
+
+// Envía el cupón de bienvenida al suscriptor usando la plantilla aprobada.
+// Cuerpo de la plantilla: {{1}} nombre, {{2}} código del cupón.
+export async function sendCuponBienvenida(opts: {
+  to: string
+  nombre: string
+  cupon: string
+}): Promise<SendResult> {
+  const c = whatsappConfig()
+  return sendTemplateMessage({
+    to: opts.to,
+    template: c.cuponTemplate,
+    lang: c.cuponLang,
+    bodyParams: [opts.nombre, opts.cupon],
+  })
 }

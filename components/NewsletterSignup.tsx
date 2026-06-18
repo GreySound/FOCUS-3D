@@ -7,7 +7,7 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
   const [form, setForm] = useState({ nombre: '', telefono: '', email: '', acepta: false, sitio: '' })
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle')
   const [error, setError] = useState('')
-  const [result, setResult] = useState<{ token?: string; whatsappUrl?: string }>({})
+  const [result, setResult] = useState<{ token?: string; cupon?: string; whatsappUrl?: string; enviadoAuto?: boolean }>({})
   const [abierto, setAbierto] = useState(false)
 
   const handleTel = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,12 +24,31 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
       setStatus('error')
       return
     }
-    setResult({ token: res.token, whatsappUrl: res.whatsappUrl })
+    setResult({ token: res.token, cupon: res.cupon, whatsappUrl: res.whatsappUrl, enviadoAuto: res.enviadoAuto })
     setStatus('ok')
     onDone?.()
   }
 
   if (status === 'ok') {
+    // Caso ideal: el cupón ya le llegó automáticamente por WhatsApp.
+    if (result.enviadoAuto) {
+      return (
+        <div className="flex flex-col gap-4 text-center">
+          <div className="w-14 h-14 border border-gold rounded-full flex items-center justify-center text-gold text-2xl mx-auto">🎁</div>
+          <h3 className="font-serif text-2xl text-pearl">¡Listo!</h3>
+          <p className="text-stone font-light text-sm leading-relaxed">
+            Te enviamos tu <strong className="text-pearl">cupón del 10%</strong> por WhatsApp 📲<br />
+            Revisa tu chat — ya puedes usarlo en tu próxima compra.
+          </p>
+          {result.cupon && (
+            <div className="font-mono text-gold text-lg tracking-[3px] border border-gold/30 py-2">{result.cupon}</div>
+          )}
+          <p className="text-ash font-light text-[11px]">¿No te llegó? Escríbenos por WhatsApp y con gusto te lo reenviamos.</p>
+        </div>
+      )
+    }
+
+    // Fallback: la API no está activa o falló el envío → el cliente lo solicita.
     return (
       <div className="flex flex-col gap-4 text-center">
         <div className="w-14 h-14 border border-gold rounded-full flex items-center justify-center text-gold text-2xl mx-auto">🎁</div>

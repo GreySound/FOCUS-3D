@@ -1,6 +1,6 @@
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import type { Suscriptor } from '@/lib/supabase'
-import { CopiarTelefonos, SuscriptorAcciones } from './SuscriptoresUI'
+import { CopiarTelefonos, SuscriptorAcciones, CuponUsadoBtn } from './SuscriptoresUI'
 
 export default async function AdminSuscriptores() {
   const supabase = createAdminSupabaseClient()
@@ -39,9 +39,19 @@ export default async function AdminSuscriptores() {
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-stone">Registro: {s.token}</span>
                     <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-gold">Cupón: {s.cupon}</span>
+                    {s.cupon_usado ? (
+                      <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-stone">✓ Usado{s.cupon_usado_at ? ` · ${new Date(s.cupon_usado_at).toLocaleDateString('es-MX')}` : ''}</span>
+                    ) : s.cupon_enviado_at ? (
+                      <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-green-400">📲 Enviado · {new Date(s.cupon_enviado_at).toLocaleDateString('es-MX')}</span>
+                    ) : (
+                      <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-ash">Cupón sin enviar</span>
+                    )}
                   </div>
                 </div>
-                <SuscriptorAcciones id={s.id} verificado={s.estado === 'verificado'} />
+                <div className="flex flex-col items-end gap-2">
+                  <SuscriptorAcciones id={s.id} verificado={s.estado === 'verificado'} />
+                  <CuponUsadoBtn id={s.id} usado={s.cupon_usado} />
+                </div>
               </div>
             </div>
           ))}

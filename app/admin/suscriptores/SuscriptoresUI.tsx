@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { marcarSuscriptorVerificado, eliminarSuscriptor } from '@/lib/admin-actions'
+import { marcarSuscriptorVerificado, eliminarSuscriptor, marcarCuponUsado } from '@/lib/admin-actions'
 
 // Botón para copiar todos los teléfonos (para crear la Lista de Difusión en WhatsApp).
 export function CopiarTelefonos({ telefonos }: { telefonos: string[] }) {
@@ -25,6 +25,30 @@ export function CopiarTelefonos({ telefonos }: { telefonos: string[] }) {
       className="font-mono text-[9px] tracking-[2px] uppercase border border-gold/40 text-gold px-4 py-2 hover:bg-gold/10 transition-colors"
     >
       {copiado ? '✓ Copiados' : `Copiar ${telefonos.length} teléfonos`}
+    </button>
+  )
+}
+
+// Botón para marcar el cupón de un suscriptor como usado / sin usar.
+export function CuponUsadoBtn({ id, usado }: { id: string; usado: boolean }) {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
+  const toggle = async () => {
+    setLoading(true)
+    await marcarCuponUsado(id, !usado)
+    router.refresh()
+    setLoading(false)
+  }
+
+  return (
+    <button
+      onClick={toggle}
+      disabled={loading}
+      className={`font-mono text-[8px] tracking-wide uppercase border px-2.5 py-1 transition-colors disabled:opacity-50
+        ${usado ? 'border-stone/30 text-stone hover:bg-stone/10' : 'border-gold/30 text-gold hover:bg-gold/10'}`}
+    >
+      {usado ? '✓ Cupón usado' : 'Marcar cupón usado'}
     </button>
   )
 }
