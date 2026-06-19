@@ -291,3 +291,23 @@ export async function eliminarSuscriptor(id: string): Promise<Result> {
   revalidatePath('/admin/suscriptores')
   return { ok: true }
 }
+
+// Marca (o desmarca) el cupón de un suscriptor como usado en una compra.
+export async function marcarCuponUsado(id: string, usado = true): Promise<Result> {
+  const denied = await ensureAdmin()
+  if (denied) return denied
+  if (!id) return { ok: false, error: 'ID requerido' }
+
+  const supabase = createAdminSupabaseClient()
+  const { error } = await supabase
+    .from('suscriptores')
+    .update({
+      cupon_usado: usado,
+      cupon_usado_at: usado ? new Date().toISOString() : null,
+    })
+    .eq('id', id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/admin/suscriptores')
+  return { ok: true }
+}

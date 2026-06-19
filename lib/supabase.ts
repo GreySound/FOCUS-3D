@@ -61,6 +61,9 @@ export type Suscriptor = {
   cupon: string
   estado: 'pendiente' | 'verificado'
   acepta_promos: boolean
+  cupon_enviado_at: string | null
+  cupon_usado: boolean
+  cupon_usado_at: string | null
   created_at: string
 }
 

@@ -138,6 +138,11 @@ create table if not exists suscriptores (
 );
 create unique index if not exists idx_suscriptores_telefono on suscriptores(telefono);
 
+-- Tracking del cupón de bienvenida (auto-envío + redención):
+alter table suscriptores add column if not exists cupon_enviado_at timestamptz;  -- cuándo se le envió el cupón por WhatsApp
+alter table suscriptores add column if not exists cupon_usado boolean not null default false;  -- ¿ya lo redimió?
+alter table suscriptores add column if not exists cupon_usado_at timestamptz;     -- cuándo lo usó
+
 -- Datos personales: el alta y la gestión se hacen SOLO desde el servidor con la
 -- service role key. Sin políticas públicas, la clave anónima no puede leerlos.
 alter table suscriptores enable row level security;
