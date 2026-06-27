@@ -13,7 +13,6 @@
 // Siempre devolvemos también un link público /cupon/[token] como fallback,
 // para que pueda copiar/compartir su cupón aunque algún envío falle.
 import { createAdminSupabaseClient } from './supabase-admin'
-import { siteConfig } from './site-config'
 import { isEmailConfigured, sendCuponBienvenidaEmail } from './email'
 import { isSmsConfigured, sendCuponBienvenidaSms } from './sms'
 
@@ -46,9 +45,10 @@ function emailValido(raw: string): boolean {
 type Result = {
   ok: boolean
   error?: string
-  token?: string
-  cupon?: string
-  cuponUrl?: string                // página pública /cupon/[token] (fallback siempre disponible)
+  // El cupón en sí (cupon) y su token NO se devuelven al cliente:
+  // viven únicamente en el correo / SMS que se envía. Esto evita exponer
+  // el código en pantallas públicas y mantiene los mensajes como la única
+  // "fuente de verdad" del cupón.
   enviadoPorEmail?: boolean        // el email salió correctamente
   enviadoPorSms?: boolean          // el SMS salió correctamente
 }
@@ -136,17 +136,18 @@ export async function suscribir(input: {
     }
   }
 
-  const cuponUrl = `${siteConfig.url}/cupon/${encodeURIComponent(token!)}`
+  const cuponEnviar = cupon!
+  const tokenSub = token!
 
   // ── Envíos ────────────────────────────────────────────────
   // Mandamos por TODOS los canales que el suscriptor nos dio Y que estén
-  // configurados en el servidor. Si alguno falla, no rompemos el alta:
-  // siempre devolvemos el cuponUrl para que el cliente pueda verlo en web.
+  // configurados en el servidor. El cupón vive únicamente en estos mensajes:
+  // si todos fallan, el caller debe avisar al cliente que reintente.
   let enviadoPorEmail = false
   let enviadoPorSms = false
 
-  if (cupon && email && isEmailConfigured()) {
-    const r = await sendCuponBienvenidaEmail({ to: email, nombre, cupon, token: token! })
+  if (email && isEmailConfigured()) {
+    const r = await sendCuponBienvenidaEmail({ to: email, nombre, cupon: cuponEnviar })
     if (r.ok) {
       enviadoPorEmail = true
       try {
@@ -156,13 +157,13 @@ export async function suscribir(input: {
             cupon_enviado_email_at: new Date().toISOString(),
             cupon_enviado_at: new Date().toISOString(),
           })
-          .eq('token', token)
+          .eq('token', tokenSub)
       } catch { /* columnas opcionales */ }
     }
   }
 
-  if (cupon && telefono && isSmsConfigured()) {
-    const r = await sendCuponBienvenidaSms({ to: telefono, nombre, cupon, token: token! })
+  if (telefono && isSmsConfigured()) {
+    const r = await sendCuponBienvenidaSms({ to: telefono, nombre, cupon: cuponEnviar })
     if (r.ok) {
       enviadoPorSms = true
       try {
@@ -172,16 +173,13 @@ export async function suscribir(input: {
             cupon_enviado_sms_at: new Date().toISOString(),
             cupon_enviado_at: new Date().toISOString(),
           })
-          .eq('token', token)
+          .eq('token', tokenSub)
       } catch { /* columnas opcionales */ }
     }
   }
 
   return {
     ok: true,
-    token,
-    cupon,
-    cuponUrl,
     enviadoPorEmail,
     enviadoPorSms,
   }

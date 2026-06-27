@@ -5,6 +5,10 @@ import { suscribir } from '@/lib/newsletter-actions'
 
 // Formulario de alta al newsletter (cupón de bienvenida).
 // El suscriptor decide cómo recibirlo: email, SMS o ambos. Pedimos al menos uno.
+//
+// IMPORTANTE: el código del cupón NUNCA se muestra en la pantalla de confirmación.
+// Vive únicamente en el correo o SMS que recibe la persona — esa es la fuente
+// única de verdad y refuerza que revise su bandeja.
 export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
   const [form, setForm] = useState({
     nombre: '',
@@ -16,12 +20,12 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle')
   const [error, setError] = useState('')
   const [result, setResult] = useState<{
-    token?: string
-    cupon?: string
-    cuponUrl?: string
     enviadoPorEmail?: boolean
     enviadoPorSms?: boolean
-  }>({})
+    // Dónde se intentó enviar (para mensajes específicos).
+    intentoEmail: boolean
+    intentoSms: boolean
+  }>({ intentoEmail: false, intentoSms: false })
 
   // Permite dígitos, espacios y los caracteres de formato comunes en MX.
   const handleTel = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,61 +36,62 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
     e.preventDefault()
     setStatus('sending')
     setError('')
+
+    const intentoEmail = !!form.email.trim()
+    const intentoSms = !!form.telefono.trim()
+
     const res = await suscribir(form)
     if (!res.ok) {
       setError(res.error ?? 'Algo salió mal.')
       setStatus('error')
       return
     }
+
+    // Si la persona dio uno o más canales pero NINGUNO logró enviar,
+    // tratamos esto como error: el cupón solo existe en el correo/SMS,
+    // así que sin envío no hay forma de que lo reciba.
+    const enviado = !!res.enviadoPorEmail || !!res.enviadoPorSms
+    const seIntento = intentoEmail || intentoSms
+    if (seIntento && !enviado) {
+      setError(
+        'No pudimos enviarte el cupón en este momento. Intenta de nuevo en unos minutos o escríbenos por WhatsApp.'
+      )
+      setStatus('error')
+      return
+    }
+
     setResult({
-      token: res.token,
-      cupon: res.cupon,
-      cuponUrl: res.cuponUrl,
       enviadoPorEmail: res.enviadoPorEmail,
       enviadoPorSms: res.enviadoPorSms,
+      intentoEmail,
+      intentoSms,
     })
     setStatus('ok')
     onDone?.()
   }
 
   if (status === 'ok') {
-    // Resumen de canales: lista lo que sí se mandó para que el cliente sepa dónde buscar.
-    const canales: string[] = []
-    if (result.enviadoPorEmail) canales.push('correo')
-    if (result.enviadoPorSms) canales.push('SMS')
-    const mensajeCanales =
-      canales.length === 2
-        ? 'Te enviamos tu cupón por correo y por SMS.'
-        : canales.length === 1
-        ? `Te enviamos tu cupón por ${canales[0]}.`
-        : 'Tu cupón está listo aquí abajo — guárdalo en un lugar seguro.'
+    // Construimos el mensaje según los canales que se enviaron con éxito.
+    const partes: string[] = []
+    if (result.enviadoPorEmail) partes.push('a tu correo')
+    if (result.enviadoPorSms) partes.push('a tu celular por SMS')
+    const destino = partes.length === 2 ? partes.join(' y ') : partes[0] || ''
 
     return (
       <div className="flex flex-col gap-4 text-center">
-        <div className="w-14 h-14 border border-gold rounded-full flex items-center justify-center text-gold text-2xl mx-auto">🎁</div>
+        <div className="w-14 h-14 border border-gold rounded-full flex items-center justify-center text-gold text-2xl mx-auto">
+          ✉
+        </div>
         <h3 className="font-serif text-2xl text-pearl">¡Listo!</h3>
         <p className="text-stone font-light text-sm leading-relaxed">
-          {mensajeCanales} Úsalo en tu próxima compra.
+          Acabamos de enviarte tu <strong className="text-pearl">cupón del 10%</strong>
+          {destino && <> {destino}</>}.
+          <br />
+          Revisa tu bandeja en los próximos minutos.
         </p>
-
-        {result.cupon && (
-          <div className="font-mono text-gold text-lg tracking-[3px] border border-gold/30 py-3 select-all break-all">
-            {result.cupon}
-          </div>
-        )}
-
-        {result.cuponUrl && (
-          <a
-            href={result.cuponUrl}
-            className="w-full text-center bg-gold text-carbon font-mono text-[11px] tracking-[3px] uppercase py-4 hover:opacity-90 transition-opacity font-medium"
-          >
-            Ver mi cupón →
-          </a>
-        )}
-
-        {canales.length === 0 && (
+        {result.enviadoPorEmail && (
           <p className="text-ash font-light text-[11px]">
-            ¿No querías esperarnos? Guarda tu código arriba o usa el botón para ir a la página de tu cupón.
+            Si no lo ves, revisa la carpeta de <em>Promociones</em> o <em>Spam</em>.
           </p>
         )}
       </div>
@@ -150,7 +155,7 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
         disabled={status === 'sending'}
         className="btn-gold w-full text-center mt-1 disabled:opacity-50"
       >
-        {status === 'sending' ? 'Generando…' : 'Quiero mi 10%'}
+        {status === 'sending' ? 'Enviando…' : 'Quiero mi 10%'}
       </button>
     </form>
   )

@@ -136,18 +136,19 @@ function escapeHtml(s: string): string {
 // ──────────────────────────────────────────────────────────
 //  Cupón de bienvenida (alta de newsletter)
 // ──────────────────────────────────────────────────────────
+// El código del cupón se entrega DENTRO del email — esta es la única
+// pieza autoritativa donde el cliente lo verá. El sitio web no muestra
+// el código en ninguna pantalla pública (incluida la confirmación del alta).
 export async function sendCuponBienvenidaEmail(opts: {
   to: string
   nombre: string
   cupon: string
-  token: string
 }): Promise<SendEmailResult> {
   const gold = '#b89a5a'
   const pearl = '#e8e6e0'
   const ash = '#6b6860'
   const carbon = '#111110'
 
-  const cuponUrl = `${siteConfig.url}/cupon/${encodeURIComponent(opts.token)}`
   const catalogoUrl = `${siteConfig.url}/catalogo`
 
   const body = `
@@ -161,7 +162,7 @@ export async function sendCuponBienvenidaEmail(opts: {
     </h1>
     <p style="margin:0 0 24px 0;font-family:Georgia,serif;font-size:16px;line-height:1.6;color:${pearl};text-align:center;">
       Aquí está tu <em style="color:${gold};">cupón del 10%</em> de bienvenida.
-      Úsalo en tu primera pieza de Focus 3D.
+      Cópialo y úsalo al hacer tu pedido.
     </p>
 
     <div style="margin:32px 0;padding:24px;border:1px solid ${gold};text-align:center;background:rgba(184,154,90,0.05);">
@@ -176,18 +177,13 @@ export async function sendCuponBienvenidaEmail(opts: {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0;">
       <tr>
         <td align="center">
-          <a href="${cuponUrl}"
+          <a href="${catalogoUrl}"
              style="display:inline-block;background:${gold};color:${carbon};font-family:'Courier New',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;padding:16px 32px;font-weight:bold;">
-            Ver mi cupón &rarr;
+            Ver el catálogo &rarr;
           </a>
         </td>
       </tr>
     </table>
-
-    <p style="margin:24px 0 0 0;font-family:Georgia,serif;font-size:14px;line-height:1.6;color:${ash};text-align:center;">
-      O explora el catálogo directamente:
-      <a href="${catalogoUrl}" style="color:${gold};">${escapeHtml(siteConfig.url.replace(/^https?:\/\//,''))}/catalogo</a>
-    </p>
 
     <p style="margin:32px 0 0 0;font-family:Georgia,serif;font-size:12px;line-height:1.6;color:${ash};text-align:center;font-style:italic;">
       Te avisaremos primero cuando salgan nuevas piezas o promociones especiales.
@@ -197,7 +193,7 @@ export async function sendCuponBienvenidaEmail(opts: {
   const text =
     `Hola ${opts.nombre},\n\n` +
     `Tu cupón del 10% en Focus 3D: ${opts.cupon}\n\n` +
-    `Verlo: ${cuponUrl}\n` +
+    `Úsalo al hacer tu pedido.\n` +
     `Catálogo: ${catalogoUrl}\n\n` +
     `— ${siteConfig.name}`
 

@@ -75,18 +75,18 @@ async function sendSms(opts: { to: string; body: string }): Promise<SendSmsResul
 // SMS NO soporta HTML ni acentos garantizados en todos los carriers MX
 // (algunos los entregan como ASCII). Mantenemos texto plano, corto y claro.
 
-// Cupón de bienvenida. ~145-155 caracteres (1 segmento = 1 mensaje).
+// Cupón de bienvenida. ~120-140 caracteres (1 segmento = 1 mensaje).
+// El código va EN el SMS — el cliente lo copia/escribe directamente al pedir.
 export async function sendCuponBienvenidaSms(opts: {
   to: string
   nombre: string
   cupon: string
-  token: string
 }): Promise<SendSmsResult> {
-  const cuponUrl = `${siteConfig.url}/cupon/${encodeURIComponent(opts.token)}`
+  const dominio = siteConfig.url.replace(/^https?:\/\//, '')
   const body =
     `${siteConfig.name}: Hola ${opts.nombre}, ` +
     `tu cupon 10% es ${opts.cupon}. ` +
-    `Actívalo aquí: ${cuponUrl}`
+    `Úsalo al pedir en ${dominio}/catalogo`
   return sendSms({ to: opts.to, body })
 }
 
