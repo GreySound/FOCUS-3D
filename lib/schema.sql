@@ -124,24 +124,40 @@ drop policy if exists "Insertar items" on pedido_items;
 -- ════════════════════════════════════════════
 -- Suscriptores (cupón de bienvenida + difusión)
 -- ════════════════════════════════════════════
+-- El cupón se entrega por email y/o SMS (el suscriptor elige qué quiere dar:
+-- email, teléfono o ambos). Si la API de WhatsApp algún día está disponible,
+-- el código sigue compatible (lib/whatsapp.ts se mantiene), pero NO es requisito.
 create table if not exists suscriptores (
   id uuid primary key default gen_random_uuid(),
   nombre text not null,
-  telefono text not null unique,                -- WhatsApp normalizado (52 + 10 dígitos). UNIQUE = 1 cupón por número
-  email text,
-  canal text not null default 'whatsapp',
-  token text not null unique,                   -- código de registro que el cliente envía por WhatsApp
-  cupon text not null,                          -- cupón único 10% (lo entrega el admin por WhatsApp)
+  telefono text,                                -- móvil MX normalizado (52 + 10 dígitos). UNIQUE parcial: 1 cupón por número
+  email text,                                   -- correo. UNIQUE parcial: 1 cupón por email
+  canal text not null default 'email',          -- canal preferido (informativo): 'email' | 'sms' | 'ambos'
+  token text not null unique,                   -- código de registro / clave de la página pública del cupón
+  cupon text not null,                          -- cupón único 10% (BIENVENIDA-XXXXX)
   estado text not null default 'pendiente',     -- pendiente | verificado
   acepta_promos boolean not null default true,  -- consentimiento (LFPDPPP)
   created_at timestamptz not null default now()
 );
-create unique index if not exists idx_suscriptores_telefono on suscriptores(telefono);
 
--- Tracking del cupón de bienvenida (auto-envío + redención):
-alter table suscriptores add column if not exists cupon_enviado_at timestamptz;  -- cuándo se le envió el cupón por WhatsApp
-alter table suscriptores add column if not exists cupon_usado boolean not null default false;  -- ¿ya lo redimió?
-alter table suscriptores add column if not exists cupon_usado_at timestamptz;     -- cuándo lo usó
+-- Migración para bases existentes: el teléfono ya no es obligatorio.
+-- Si tu instalación ya tenía la columna como NOT NULL, esto la libera.
+alter table suscriptores alter column telefono drop not null;
+
+-- Anti-duplicado: 1 cupón por canal. Usamos índices parciales para permitir
+-- registrarse solo con teléfono O solo con email O con ambos, sin conflictos.
+drop index if exists idx_suscriptores_telefono;
+create unique index if not exists idx_suscriptores_telefono_unique
+  on suscriptores(telefono) where telefono is not null;
+create unique index if not exists idx_suscriptores_email_unique
+  on suscriptores(lower(email)) where email is not null;
+
+-- Tracking del cupón de bienvenida por canal + redención:
+alter table suscriptores add column if not exists cupon_enviado_at timestamptz;        -- cuándo se envió (cualquier canal) — compat
+alter table suscriptores add column if not exists cupon_enviado_email_at timestamptz;  -- cuándo se envió por email
+alter table suscriptores add column if not exists cupon_enviado_sms_at timestamptz;    -- cuándo se envió por SMS
+alter table suscriptores add column if not exists cupon_usado boolean not null default false;
+alter table suscriptores add column if not exists cupon_usado_at timestamptz;
 
 -- Datos personales: el alta y la gestión se hacen SOLO desde el servidor con la
 -- service role key. Sin políticas públicas, la clave anónima no puede leerlos.

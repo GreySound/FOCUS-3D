@@ -1,6 +1,6 @@
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import type { Suscriptor } from '@/lib/supabase'
-import { CopiarTelefonos, SuscriptorAcciones, CuponUsadoBtn } from './SuscriptoresUI'
+import { CopiarContactos, SuscriptorAcciones, CuponUsadoBtn } from './SuscriptoresUI'
 
 export default async function AdminSuscriptores() {
   const supabase = createAdminSupabaseClient()
@@ -10,7 +10,9 @@ export default async function AdminSuscriptores() {
     .order('created_at', { ascending: false })
 
   const lista = (suscriptores ?? []) as Suscriptor[]
-  const telefonos = lista.map(s => s.telefono)
+  // Separamos los dos contactos para que el admin pueda copiar uno u otro.
+  const emails = lista.map(s => s.email).filter((e): e is string => !!e)
+  const telefonos = lista.map(s => s.telefono).filter((t): t is string => !!t)
 
   return (
     <div>
@@ -18,9 +20,14 @@ export default async function AdminSuscriptores() {
         <div>
           <div className="font-mono text-[9px] tracking-[4px] uppercase text-gold mb-1">Marketing</div>
           <h1 className="font-serif text-3xl font-light text-pearl">Suscriptores</h1>
-          <p className="text-ash font-light text-sm mt-1">{lista.length} registrados · usa "Copiar teléfonos" para tu lista de difusión.</p>
+          <p className="text-ash font-light text-sm mt-1">
+            {lista.length} registrados · {emails.length} con correo · {telefonos.length} con celular.
+          </p>
         </div>
-        <CopiarTelefonos telefonos={telefonos} />
+        <div className="flex gap-2 flex-wrap">
+          <CopiarContactos label="correos" valores={emails} />
+          <CopiarContactos label="teléfonos" valores={telefonos} />
+        </div>
       </div>
 
       {lista.length > 0 ? (
@@ -31,20 +38,44 @@ export default async function AdminSuscriptores() {
                 <div>
                   <div className="font-serif text-lg font-semibold text-pearl">{s.nombre}</div>
                   <div className="flex items-center gap-3 mt-1 flex-wrap">
-                    <a href={`https://wa.me/${s.telefono}`} target="_blank" rel="noopener noreferrer"
-                      className="font-mono text-[10px] text-gold hover:underline">{s.telefono}</a>
-                    {s.email && <span className="font-mono text-[9px] text-ash">{s.email}</span>}
-                    <span className="font-mono text-[9px] text-ash">{new Date(s.created_at).toLocaleDateString('es-MX')}</span>
+                    {s.email && (
+                      <a href={`mailto:${s.email}`} className="font-mono text-[10px] text-gold hover:underline">
+                        {s.email}
+                      </a>
+                    )}
+                    {s.telefono && (
+                      <a href={`https://wa.me/${s.telefono}`} target="_blank" rel="noopener noreferrer"
+                        className="font-mono text-[10px] text-gold hover:underline">
+                        {s.telefono}
+                      </a>
+                    )}
+                    <span className="font-mono text-[9px] text-ash">
+                      {new Date(s.created_at).toLocaleDateString('es-MX')}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
-                    <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-stone">Registro: {s.token}</span>
+                    <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-stone">Token: {s.token}</span>
                     <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-gold">Cupón: {s.cupon}</span>
                     {s.cupon_usado ? (
-                      <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-stone">✓ Usado{s.cupon_usado_at ? ` · ${new Date(s.cupon_usado_at).toLocaleDateString('es-MX')}` : ''}</span>
-                    ) : s.cupon_enviado_at ? (
-                      <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-green-400">📲 Enviado · {new Date(s.cupon_enviado_at).toLocaleDateString('es-MX')}</span>
+                      <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-stone">
+                        ✓ Usado{s.cupon_usado_at ? ` · ${new Date(s.cupon_usado_at).toLocaleDateString('es-MX')}` : ''}
+                      </span>
                     ) : (
-                      <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-ash">Cupón sin enviar</span>
+                      <>
+                        {s.cupon_enviado_email_at && (
+                          <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-green-400">
+                            ✉ Email · {new Date(s.cupon_enviado_email_at).toLocaleDateString('es-MX')}
+                          </span>
+                        )}
+                        {s.cupon_enviado_sms_at && (
+                          <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-green-400">
+                            📲 SMS · {new Date(s.cupon_enviado_sms_at).toLocaleDateString('es-MX')}
+                          </span>
+                        )}
+                        {!s.cupon_enviado_email_at && !s.cupon_enviado_sms_at && (
+                          <span className="font-mono text-[9px] bg-carbon px-2 py-1 text-ash">Cupón sin enviar</span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

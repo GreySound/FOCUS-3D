@@ -3,13 +3,31 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { suscribir } from '@/lib/newsletter-actions'
 
+// Formulario de alta al newsletter (cupón de bienvenida).
+// El suscriptor decide cómo recibirlo: email, SMS o ambos. Pedimos al menos uno.
+//
+// IMPORTANTE: el código del cupón NUNCA se muestra en la pantalla de confirmación.
+// Vive únicamente en el correo o SMS que recibe la persona — esa es la fuente
+// única de verdad y refuerza que revise su bandeja.
 export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
-  const [form, setForm] = useState({ nombre: '', telefono: '', email: '', acepta: false, sitio: '' })
+  const [form, setForm] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+    acepta: false,
+    sitio: '',
+  })
   const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle')
   const [error, setError] = useState('')
-  const [result, setResult] = useState<{ token?: string; cupon?: string; whatsappUrl?: string; enviadoAuto?: boolean }>({})
-  const [abierto, setAbierto] = useState(false)
+  const [result, setResult] = useState<{
+    enviadoPorEmail?: boolean
+    enviadoPorSms?: boolean
+    // Dónde se intentó enviar (para mensajes específicos).
+    intentoEmail: boolean
+    intentoSms: boolean
+  }>({ intentoEmail: false, intentoSms: false })
 
+  // Permite dígitos, espacios y los caracteres de formato comunes en MX.
   const handleTel = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, telefono: e.target.value.replace(/[^\d\s+()-]/g, '') }))
   }
@@ -18,70 +36,64 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
     e.preventDefault()
     setStatus('sending')
     setError('')
+
+    const intentoEmail = !!form.email.trim()
+    const intentoSms = !!form.telefono.trim()
+
     const res = await suscribir(form)
     if (!res.ok) {
       setError(res.error ?? 'Algo salió mal.')
       setStatus('error')
       return
     }
-    setResult({ token: res.token, cupon: res.cupon, whatsappUrl: res.whatsappUrl, enviadoAuto: res.enviadoAuto })
+
+    // Si la persona dio uno o más canales pero NINGUNO logró enviar,
+    // tratamos esto como error: el cupón solo existe en el correo/SMS,
+    // así que sin envío no hay forma de que lo reciba.
+    const enviado = !!res.enviadoPorEmail || !!res.enviadoPorSms
+    const seIntento = intentoEmail || intentoSms
+    if (seIntento && !enviado) {
+      setError(
+        'No pudimos enviarte el cupón en este momento. Intenta de nuevo en unos minutos o escríbenos por WhatsApp.'
+      )
+      setStatus('error')
+      return
+    }
+
+    setResult({
+      enviadoPorEmail: res.enviadoPorEmail,
+      enviadoPorSms: res.enviadoPorSms,
+      intentoEmail,
+      intentoSms,
+    })
     setStatus('ok')
     onDone?.()
   }
 
   if (status === 'ok') {
-    // Caso ideal: el cupón ya le llegó automáticamente por WhatsApp.
-    if (result.enviadoAuto) {
-      return (
-        <div className="flex flex-col gap-4 text-center">
-          <div className="w-14 h-14 border border-gold rounded-full flex items-center justify-center text-gold text-2xl mx-auto">🎁</div>
-          <h3 className="font-serif text-2xl text-pearl">¡Listo!</h3>
-          <p className="text-stone font-light text-sm leading-relaxed">
-            Te enviamos tu <strong className="text-pearl">cupón del 10%</strong> por WhatsApp 📲<br />
-            Revisa tu chat — ya puedes usarlo en tu próxima compra.
-          </p>
-          {result.cupon && (
-            <div className="font-mono text-gold text-lg tracking-[3px] border border-gold/30 py-2">{result.cupon}</div>
-          )}
-          <p className="text-ash font-light text-[11px]">¿No te llegó? Escríbenos por WhatsApp y con gusto te lo reenviamos.</p>
-        </div>
-      )
-    }
+    // Construimos el mensaje según los canales que se enviaron con éxito.
+    const partes: string[] = []
+    if (result.enviadoPorEmail) partes.push('a tu correo')
+    if (result.enviadoPorSms) partes.push('a tu celular por SMS')
+    const destino = partes.length === 2 ? partes.join(' y ') : partes[0] || ''
 
-    // Fallback: la API no está activa o falló el envío → el cliente lo solicita.
     return (
       <div className="flex flex-col gap-4 text-center">
-        <div className="w-14 h-14 border border-gold rounded-full flex items-center justify-center text-gold text-2xl mx-auto">🎁</div>
-        <h3 className="font-serif text-2xl text-pearl">¡Casi listo!</h3>
+        <div className="w-14 h-14 border border-gold rounded-full flex items-center justify-center text-gold text-2xl mx-auto">
+          ✉
+        </div>
+        <h3 className="font-serif text-2xl text-pearl">¡Listo!</h3>
         <p className="text-stone font-light text-sm leading-relaxed">
-          Toca el botón para enviarnos un WhatsApp y <strong className="text-pearl">recibir tu cupón del 10%</strong>.
-          Tu código de registro es:
+          Acabamos de enviarte tu <strong className="text-pearl">cupón del 10%</strong>
+          {destino && <> {destino}</>}.
+          <br />
+          Revisa tu bandeja en los próximos minutos.
         </p>
-        <div className="font-mono text-gold text-lg tracking-[3px] border border-gold/30 py-2">{result.token}</div>
-        {abierto ? (
-          <div className="flex flex-col gap-2">
-            <div className="w-full text-center bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/40 font-mono text-[11px] tracking-[2px] uppercase py-4 cursor-default">
-              ✓ WhatsApp abierto
-            </div>
-            <p className="text-ash font-light text-[11px]">
-              ¿No se abrió?{' '}
-              <a href={result.whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-gold underline">
-                Reintentar
-              </a>
-            </p>
-          </div>
-        ) : (
-          <a
-            href={result.whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => setAbierto(true)}
-            className="w-full text-center bg-[#25D366] text-[#0b3d24] font-mono text-[11px] tracking-[3px] uppercase py-4 hover:opacity-90 transition-opacity font-medium"
-          >
-            Recibir mi cupón por WhatsApp →
-          </a>
+        {result.enviadoPorEmail && (
+          <p className="text-ash font-light text-[11px]">
+            Si no lo ves, revisa la carpeta de <em>Promociones</em> o <em>Spam</em>.
+          </p>
         )}
-        <p className="text-ash font-light text-[11px]">Te responderemos con tu cupón en menos de 2 horas.</p>
       </div>
     )
   }
@@ -96,22 +108,25 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
         className="input-field"
       />
       <input
-        required
+        type="email"
+        value={form.email}
+        onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+        placeholder="Correo"
+        className="input-field"
+      />
+      <input
         type="tel"
         inputMode="numeric"
         value={form.telefono}
         onChange={handleTel}
-        placeholder="WhatsApp (10 dígitos)"
+        placeholder="Celular (10 dígitos)"
         maxLength={14}
         className="input-field"
       />
-      <input
-        type="email"
-        value={form.email}
-        onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-        placeholder="Correo (opcional)"
-        className="input-field"
-      />
+      <p className="text-ash font-light text-[10px] -mt-1">
+        Te enviamos el cupón por el canal que prefieras. Déjanos correo, celular o ambos.
+      </p>
+
       {/* Honeypot: oculto para humanos, los bots lo llenan */}
       <input
         type="text"
@@ -130,7 +145,7 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
           className="mt-0.5 accent-gold"
         />
         <span>
-          Acepto recibir promociones y novedades por WhatsApp, y el{' '}
+          Acepto recibir promociones y novedades, y el{' '}
           <Link href="/aviso-de-privacidad" target="_blank" className="text-gold underline">aviso de privacidad</Link>.
         </span>
       </label>
@@ -140,7 +155,7 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
         disabled={status === 'sending'}
         className="btn-gold w-full text-center mt-1 disabled:opacity-50"
       >
-        {status === 'sending' ? 'Generando…' : 'Quiero mi 10%'}
+        {status === 'sending' ? 'Enviando…' : 'Quiero mi 10%'}
       </button>
     </form>
   )

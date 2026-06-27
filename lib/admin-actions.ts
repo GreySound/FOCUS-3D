@@ -7,7 +7,8 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminSupabaseClient } from './supabase-admin'
 import { isAdminAuthenticated } from './auth'
-import { isWhatsappConfigured, sendTemplateMessage } from './whatsapp'
+import { isEmailConfigured, sendPromocionEmail } from './email'
+import { isSmsConfigured, sendPromocionSms } from './sms'
 
 const LINEAS = ['Essentials', 'Statement', 'Signature', 'Custom', 'B2B']
 const ESTADOS_PRODUCTO = ['disponible', 'agotado', 'bajo_pedido']
@@ -109,12 +110,20 @@ export async function deleteProducto(id: string): Promise<Result> {
   return { ok: true }
 }
 
-// ── Difusión de promoción por WhatsApp ─────────────────────
-// Envía una plantilla aprobada a los suscriptores que aceptan promociones.
-// Es una acción DELIBERADA (botón en el admin), no automática: cada mensaje
-// de marketing tiene costo y WhatsApp exige plantilla pre-aprobada + opt-in.
+// ── Difusión de promoción por Email + SMS ─────────────────
+// Envía la promoción a TODOS los suscriptores que aceptaron promociones,
+// usando cada canal disponible (email si dejó correo, SMS si dejó teléfono).
+// Es una acción DELIBERADA (botón en el admin), no automática: el envío masivo
+// tiene costo y los suscriptores ya dieron consentimiento al registrarse.
 type NotificarResult = Result & {
-  resumen?: { enviados: number; fallidos: number; total: number; errores: string[] }
+  resumen?: {
+    enviadosEmail: number
+    enviadosSms: number
+    fallidosEmail: number
+    fallidosSms: number
+    total: number
+    errores: string[]
+  }
 }
 
 export async function notificarPromocionSuscriptores(
@@ -124,11 +133,13 @@ export async function notificarPromocionSuscriptores(
   if (denied) return denied
   if (!productId) return { ok: false, error: 'ID requerido' }
 
-  if (!isWhatsappConfigured()) {
+  const emailOk = isEmailConfigured()
+  const smsOk = isSmsConfigured()
+  if (!emailOk && !smsOk) {
     return {
       ok: false,
       error:
-        'La API de WhatsApp aún no está configurada. Define WHATSAPP_ACCESS_TOKEN y WHATSAPP_PHONE_NUMBER_ID en el servidor.',
+        'No hay canales de envío configurados. Define RESEND_API_KEY (email) o las credenciales TWILIO_* (SMS) en el servidor.',
     }
   }
 
@@ -143,56 +154,64 @@ export async function notificarPromocionSuscriptores(
   if (!producto.en_promocion) {
     return { ok: false, error: 'Este producto no está marcado como promoción.' }
   }
-  // La plantilla incluye imagen de encabezado: el producto necesita al menos una foto.
-  const headerImageUrl: string | undefined = producto.imagenes?.[0]
-  if (!headerImageUrl) {
-    return {
-      ok: false,
-      error: 'El producto no tiene imagen. Agrega al menos una foto para enviar la promo (la plantilla incluye imagen).',
-    }
-  }
+  // El email muestra una imagen del producto. No es obligatorio, pero recomendamos pedirla:
+  // si solo hay SMS, no es problema (el SMS es texto plano).
+  const imagen: string | undefined = producto.imagenes?.[0]
 
-  // Solo suscriptores con consentimiento de promociones (LFPDPPP / opt-in).
+  // Suscriptores con consentimiento (LFPDPPP / opt-in).
   const { data: subs, error: sErr } = await supabase
     .from('suscriptores')
-    .select('telefono, acepta_promos')
+    .select('nombre, email, telefono, acepta_promos')
     .eq('acepta_promos', true)
   if (sErr) return { ok: false, error: sErr.message }
 
-  const destinatarios = (subs ?? []).filter((s) => s.acepta_promos && s.telefono)
+  const destinatarios = (subs ?? []).filter((s) => s.acepta_promos && (s.email || s.telefono))
   if (destinatarios.length === 0) {
-    return { ok: false, error: 'No hay suscriptores que acepten promociones.' }
+    return { ok: false, error: 'No hay suscriptores con email o teléfono que acepten promociones.' }
   }
 
-  // Variables de la plantilla:
-  //   header  → imagen del producto (headerImageUrl)
-  //   {{1}}   → nombre del producto
-  //   {{2}}   → oferta (etiqueta + precio promo)
-  //   botón   → id del producto, que se anexa a la URL base de la plantilla
-  //             (https://focus3d.art/producto/{{1}})
   const etiqueta = producto.promo_etiqueta || 'Promoción'
   const precio =
     producto.precio_promo != null
       ? `$${producto.precio_promo.toLocaleString('es-MX')}`
       : `desde $${producto.precio_min.toLocaleString('es-MX')}`
 
-  let enviados = 0
-  let fallidos = 0
+  let enviadosEmail = 0
+  let enviadosSms = 0
+  let fallidosEmail = 0
+  let fallidosSms = 0
   const errores: string[] = []
 
-  // Envío secuencial: respeta los límites de velocidad de la Cloud API.
+  // Envío secuencial: respeta límites de rate de Resend (10/seg en plan free)
+  // y de Twilio. Para listas muy grandes (>100) se puede paralelizar después.
   for (const s of destinatarios) {
-    const r = await sendTemplateMessage({
-      to: s.telefono,
-      headerImageUrl,
-      bodyParams: [producto.nombre, `${etiqueta} · ${precio}`],
-      buttonUrlParam: producto.id,
-    })
-    if (r.ok) {
-      enviados++
-    } else {
-      fallidos++
-      if (r.error && errores.length < 3) errores.push(r.error)
+    if (s.email && emailOk) {
+      const r = await sendPromocionEmail({
+        to: s.email,
+        nombre: s.nombre || 'Hola',
+        producto: { id: producto.id, nombre: producto.nombre, imagen },
+        etiqueta,
+        precio,
+      })
+      if (r.ok) enviadosEmail++
+      else {
+        fallidosEmail++
+        if (r.error && errores.length < 3) errores.push(`email: ${r.error}`)
+      }
+    }
+    if (s.telefono && smsOk) {
+      const r = await sendPromocionSms({
+        to: s.telefono,
+        nombre: s.nombre || 'Hola',
+        producto: { id: producto.id, nombre: producto.nombre },
+        etiqueta,
+        precio,
+      })
+      if (r.ok) enviadosSms++
+      else {
+        fallidosSms++
+        if (r.error && errores.length < 3) errores.push(`sms: ${r.error}`)
+      }
     }
   }
 
@@ -206,13 +225,21 @@ export async function notificarPromocionSuscriptores(
     /* columna opcional; no es crítico */
   }
 
+  const totalEnviados = enviadosEmail + enviadosSms
   return {
-    ok: enviados > 0,
+    ok: totalEnviados > 0,
     error:
-      enviados === 0
+      totalEnviados === 0
         ? `No se pudo enviar a ningún suscriptor. ${errores[0] ?? ''}`.trim()
         : undefined,
-    resumen: { enviados, fallidos, total: destinatarios.length, errores },
+    resumen: {
+      enviadosEmail,
+      enviadosSms,
+      fallidosEmail,
+      fallidosSms,
+      total: destinatarios.length,
+      errores,
+    },
   }
 }
 

@@ -54,7 +54,7 @@ export type Mensaje = {
 export type Suscriptor = {
   id: string
   nombre: string
-  telefono: string
+  telefono: string | null
   email: string | null
   canal: string
   token: string
@@ -62,6 +62,8 @@ export type Suscriptor = {
   estado: 'pendiente' | 'verificado'
   acepta_promos: boolean
   cupon_enviado_at: string | null
+  cupon_enviado_email_at: string | null
+  cupon_enviado_sms_at: string | null
   cupon_usado: boolean
   cupon_usado_at: string | null
   created_at: string

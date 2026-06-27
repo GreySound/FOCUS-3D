@@ -3,13 +3,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { marcarSuscriptorVerificado, eliminarSuscriptor, marcarCuponUsado } from '@/lib/admin-actions'
 
-// Botón para copiar todos los teléfonos (para crear la Lista de Difusión en WhatsApp).
-export function CopiarTelefonos({ telefonos }: { telefonos: string[] }) {
+// Botón genérico para copiar una lista de contactos (correos o teléfonos)
+// al portapapeles. Útil para armar campañas externas, listas de difusión, etc.
+export function CopiarContactos({ valores, label }: { valores: string[]; label: string }) {
   const [copiado, setCopiado] = useState(false)
 
   const copiar = async () => {
     try {
-      await navigator.clipboard.writeText(telefonos.join('\n'))
+      await navigator.clipboard.writeText(valores.join('\n'))
       setCopiado(true)
       setTimeout(() => setCopiado(false), 2000)
     } catch {
@@ -17,14 +18,14 @@ export function CopiarTelefonos({ telefonos }: { telefonos: string[] }) {
     }
   }
 
-  if (telefonos.length === 0) return null
+  if (valores.length === 0) return null
 
   return (
     <button
       onClick={copiar}
       className="font-mono text-[9px] tracking-[2px] uppercase border border-gold/40 text-gold px-4 py-2 hover:bg-gold/10 transition-colors"
     >
-      {copiado ? '✓ Copiados' : `Copiar ${telefonos.length} teléfonos`}
+      {copiado ? `✓ ${valores.length} copiados` : `Copiar ${valores.length} ${label}`}
     </button>
   )
 }

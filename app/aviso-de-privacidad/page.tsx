@@ -31,21 +31,22 @@ export default function AvisoPrivacidad() {
               </Bloque>
 
               <Bloque titulo="Datos que recabamos">
-                Nombre, número de WhatsApp y, opcionalmente, correo electrónico. Los obtenemos
-                únicamente cuando tú decides suscribirte a nuestras promociones.
+                Nombre y, según tú elijas, correo electrónico y/o número de celular.
+                Los obtenemos únicamente cuando tú decides suscribirte a nuestras promociones.
               </Bloque>
 
               <Bloque titulo="Finalidad">
                 Usamos tus datos para enviarte tu cupón de bienvenida y para informarte sobre
-                nuevos productos, lanzamientos y promociones a través de WhatsApp. No los usamos
-                para ningún otro fin ni los compartimos con terceros.
+                nuevos productos, lanzamientos y promociones por correo electrónico y mensaje
+                de texto (SMS). No los usamos para ningún otro fin ni los compartimos con terceros.
               </Bloque>
 
               <Bloque titulo="Tus derechos (ARCO)">
                 Puedes Acceder, Rectificar, Cancelar u Oponerte al uso de tus datos en cualquier
-                momento. Para darte de baja, basta con responder <strong className="text-pearl">BAJA</strong> a
-                cualquiera de nuestros mensajes de WhatsApp, o escribirnos a{' '}
-                <a href={`mailto:${siteConfig.contact.email}`} className="text-gold underline">{siteConfig.contact.email}</a>.
+                momento. Para darte de baja, responde <strong className="text-pearl">BAJA</strong> a
+                cualquier SMS que te enviemos, o escríbenos a{' '}
+                <a href={`mailto:${siteConfig.contact.email}`} className="text-gold underline">{siteConfig.contact.email}</a>{' '}
+                desde el correo con el que te suscribiste.
               </Bloque>
 
               <Bloque titulo="Conservación">
