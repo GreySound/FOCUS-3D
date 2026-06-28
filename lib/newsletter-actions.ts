@@ -79,7 +79,7 @@ export async function suscribir(input: {
   const telefonoRaw = (input.telefono ?? '').trim()
   const telefono = telefonoRaw ? normalizarTelefono(telefonoRaw) : null
   if (telefonoRaw && !telefono) {
-    return { ok: false, error: 'Ingresa un número de WhatsApp/celular válido (10 dígitos).' }
+    return { ok: false, error: 'Ingresa un número de celular válido (10 dígitos).' }
   }
 
   if (!email && !telefono) {
@@ -96,27 +96,19 @@ export async function suscribir(input: {
   let existing: { token: string; cupon: string } | null = null
 
   if (telefono) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('suscriptores')
       .select('token, cupon')
       .eq('telefono', telefono)
       .maybeSingle()
-    if (error) {
-      console.error('[suscribir] select por telefono falló:', error)
-      return { ok: false, error: `Error buscando por teléfono: ${error.message}` }
-    }
     if (data) existing = data as { token: string; cupon: string }
   }
   if (!existing && email) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('suscriptores')
       .select('token, cupon')
       .eq('email', email)
       .maybeSingle()
-    if (error) {
-      console.error('[suscribir] select por email falló:', error)
-      return { ok: false, error: `Error buscando por correo: ${error.message}` }
-    }
     if (data) existing = data as { token: string; cupon: string }
   }
 
@@ -133,24 +125,13 @@ export async function suscribir(input: {
       nombre, telefono, email, canal, token, cupon, acepta_promos: true,
     }])
     if (error) {
-      console.error('[suscribir] INSERT falló:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        payload: { nombre, telefono, email, canal, token, cupon },
-      })
       // Conflicto raro de carrera con el índice único: recuperamos lo que ya existe.
       const recovery = await recuperarExistente(supabase, { telefono, email })
       if (recovery) {
         token = recovery.token
         cupon = recovery.cupon
       } else {
-        // Exponemos el detalle del error para diagnosticar (ej. constraint, RLS, etc.).
-        return {
-          ok: false,
-          error: `No se pudo registrar (${error.code || 'err'}): ${error.message}`,
-        }
+        return { ok: false, error: 'No se pudo completar el registro. Intenta de nuevo.' }
       }
     }
   }

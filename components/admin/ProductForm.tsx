@@ -150,7 +150,9 @@ export default function ProductForm({ producto }: { producto?: Producto }) {
               />
             </div>
             <p className="md:col-span-2 text-ash font-light text-[11px]">
-              La pieza se destacará con una insignia dorada en la tienda. (A futuro: avisar a los suscriptores por WhatsApp.)
+              La pieza se destacará con una insignia dorada en la tienda. Cuando esté
+              lista, usa el botón &quot;Avisar promo&quot; en el listado de productos para
+              notificar a tus suscriptores por correo y SMS.
             </p>
           </div>
         )}

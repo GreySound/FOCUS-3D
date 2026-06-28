@@ -192,8 +192,8 @@ export default async function Home() {
           <div className="section-tag mb-5">Cupón de bienvenida</div>
           <h2 className="section-title mb-5">10% en tu<br /><em className="text-gold">primera pieza.</em></h2>
           <p className="text-marble font-light leading-relaxed mb-10">
-            Suscríbete con tu WhatsApp y recibe tu cupón del 10%. Además serás el primero
-            en enterarte de nuevos lanzamientos y promociones.
+            Suscríbete y recibe tu cupón del 10% directo en tu correo o por SMS.
+            Además serás el primero en enterarte de nuevos lanzamientos y promociones.
           </p>
           <div className="max-w-sm mx-auto text-left">
             <NewsletterSignup />
