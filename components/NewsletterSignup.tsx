@@ -53,8 +53,14 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
     const enviado = !!res.enviadoPorEmail || !!res.enviadoPorSms
     const seIntento = intentoEmail || intentoSms
     if (seIntento && !enviado) {
+      // Debug temporal: mostramos el detalle exacto del error de cada canal
+      // para poder diagnosticar configuraciones de Resend/Twilio en producción.
+      const partes: string[] = []
+      if (intentoEmail && res.errorEmail) partes.push(`✉ ${res.errorEmail}`)
+      if (intentoSms && res.errorSms) partes.push(`📲 ${res.errorSms}`)
+      const detalle = partes.length > 0 ? ` Detalle: ${partes.join(' · ')}` : ''
       setError(
-        'No pudimos enviarte el cupón en este momento. Intenta de nuevo en unos minutos o escríbenos por WhatsApp.'
+        'No pudimos enviarte el cupón en este momento.' + detalle
       )
       setStatus('error')
       return

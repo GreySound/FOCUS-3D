@@ -51,6 +51,10 @@ type Result = {
   // "fuente de verdad" del cupón.
   enviadoPorEmail?: boolean        // el email salió correctamente
   enviadoPorSms?: boolean          // el SMS salió correctamente
+  // Debug temporal: detalle del error si el envío de algún canal falló.
+  // Se retira cuando confirmemos que email y SMS están operando bien en producción.
+  errorEmail?: string
+  errorSms?: string
 }
 
 export async function suscribir(input: {
@@ -164,6 +168,8 @@ export async function suscribir(input: {
   // si todos fallan, el caller debe avisar al cliente que reintente.
   let enviadoPorEmail = false
   let enviadoPorSms = false
+  let errorEmail: string | undefined
+  let errorSms: string | undefined
 
   if (email && isEmailConfigured()) {
     const r = await sendCuponBienvenidaEmail({ to: email, nombre, cupon: cuponEnviar })
@@ -178,7 +184,13 @@ export async function suscribir(input: {
           })
           .eq('token', tokenSub)
       } catch { /* columnas opcionales */ }
+    } else {
+      errorEmail = r.error || 'desconocido'
+      console.error('[suscribir] email falló:', { to: email, error: r.error })
     }
+  } else if (email && !isEmailConfigured()) {
+    errorEmail = 'Resend no configurado en el servidor (falta RESEND_API_KEY)'
+    console.error('[suscribir] Resend no configurado')
   }
 
   if (telefono && isSmsConfigured()) {
@@ -194,13 +206,21 @@ export async function suscribir(input: {
           })
           .eq('token', tokenSub)
       } catch { /* columnas opcionales */ }
+    } else {
+      errorSms = r.error || 'desconocido'
+      console.error('[suscribir] sms falló:', { to: telefono, error: r.error })
     }
+  } else if (telefono && !isSmsConfigured()) {
+    errorSms = 'Twilio no configurado en el servidor (faltan credenciales TWILIO_*)'
+    console.error('[suscribir] Twilio no configurado')
   }
 
   return {
     ok: true,
     enviadoPorEmail,
     enviadoPorSms,
+    errorEmail,
+    errorSms,
   }
 }
 
