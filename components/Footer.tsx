@@ -17,7 +17,7 @@ export default function Footer() {
         {[
           { title: 'Navegar', links: [['Inicio', '/'], ['Catálogo', '/catalogo'], ['Contacto', '/contacto']] },
           { title: 'Tiendas', links: [['Mercado Libre', siteConfig.social.mercadoLibre.url], ['Instagram', siteConfig.social.instagram.url], ['WhatsApp', whatsappLink()]] },
-          { title: 'Líneas', links: [['Essentials', '/catalogo?linea=Essentials'], ['Statement', '/catalogo?linea=Statement'], ['Signature', '/catalogo?linea=Signature'], ['Custom / B2B', '/catalogo?linea=Custom']] },
+          { title: 'Líneas', links: [['Catálogo completo', '/catalogo'], ['Piezas Custom', '/catalogo?linea=Custom']] },
         ].map(({ title, links }) => (
           <div key={title}>
             <h4 className="font-mono text-[10px] tracking-[3px] uppercase text-gold mb-4">{title}</h4>

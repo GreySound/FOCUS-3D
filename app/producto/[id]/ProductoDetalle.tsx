@@ -90,9 +90,9 @@ export default function ProductoDetalle({ producto: p, relacionados }: { product
             <div className="flex flex-col gap-2 bg-ink p-5 border border-stone/10">
               {[
                 ['Línea', p.linea],
-                ['Acabado', 'Mármol / Piedra / Custom'],
+                ['Acabado disponible', 'Efecto mármol, piedra, obsidiana o custom'],
                 ['Disponibilidad', ESTADO_LABEL[p.estado]],
-                ['Edición', `Tiraje limitado — ${p.stock} unidades`],
+                ['Stock disponible', `${p.stock} unidades disponibles`],
                 ['Envío', 'Todo México · 3–7 días hábiles'],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between items-center py-2 border-b border-stone/10 last:border-0">
@@ -129,7 +129,7 @@ export default function ProductoDetalle({ producto: p, relacionados }: { product
 
             {/* Garantía */}
             <div className="flex flex-col gap-2">
-              {['Pieza artesanal, firmada y numerada', 'Acabado postprocesado a mano', 'Envío protegido en embalaje especial'].map(txt => (
+              {['Acabado manual lijado y pintado', 'Impresión 3D de alta resolución', 'Empaque protegido para envío'].map(txt => (
                 <div key={txt} className="flex items-center gap-2 font-mono text-[9px] tracking-wide uppercase text-ash">
                   <span className="text-gold">✓</span> {txt}
                 </div>

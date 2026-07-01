@@ -128,11 +128,9 @@ export default function ContactForm({ productoId, productoNombre, motivo }: Prop
           {(form.interes === 'Cotización de pieza' || form.interes === 'Lista de espera') && (
             <option value={form.interes}>{form.interes}</option>
           )}
-          <option>Panel decorativo (Essentials)</option>
-          <option>Pieza Statement / Signature</option>
-          <option>Letras / apellido personalizado</option>
-          <option>Logo 3D para negocio (B2B)</option>
-          <option>Proyecto custom</option>
+          <option>Pieza del catálogo</option>
+          <option>Proyecto personalizado (custom)</option>
+          <option>Logo 3D para negocio</option>
           <option>Solo tengo una pregunta</option>
         </select>
       </div>

@@ -3,7 +3,7 @@ export type Producto = {
   id: string
   nombre: string
   descripcion: string | null
-  linea: 'Essentials' | 'Statement' | 'Signature' | 'Custom' | 'B2B'
+  linea: 'Catálogo' | 'Custom'
   precio_min: number
   precio_max: number
   stock: number

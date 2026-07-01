@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: { default: `${siteConfig.name} — ${siteConfig.tagline}`, template: `%s | ${siteConfig.name}` },
   description: siteConfig.description,
-  keywords: ['arte 3d', 'decoración', 'escultura', 'impresión 3d', 'mármol', 'minimalista'],
+  keywords: ['esculturas decorativas', 'impresión 3d', 'decoración', 'arte clásico', 'mitología', 'acabado manual'],
   alternates: { canonical: '/' },
   openGraph: {
     title: `${siteConfig.name} — ${siteConfig.tagline}`,
-    description: 'Arte impreso que domina el espacio.',
+    description: 'Esculturas decorativas inspiradas en arte clásico. Impresión 3D con acabado manual.',
     type: 'website',
     url: siteConfig.url,
     siteName: siteConfig.name,

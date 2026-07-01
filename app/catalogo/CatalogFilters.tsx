@@ -1,7 +1,7 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-const LINEAS = ['Essentials', 'Statement', 'Signature', 'Custom', 'B2B']
+const LINEAS = ['Catálogo', 'Custom']
 
 export default function CatalogFilters({ active }: { active?: string }) {
   const router = useRouter()

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!p) return { title: 'Producto no encontrado' }
   return {
     title: p.nombre,
-    description: p.descripcion ?? `${p.nombre} — ${siteConfig.name}. Arte escultórico de autor.`,
+    description: p.descripcion ?? `${p.nombre} — ${siteConfig.name}. Esculturas decorativas inspiradas en arte clásico.`,
     alternates: { canonical: `/producto/${id}` },
     openGraph: {
       title: `${p.nombre} — ${siteConfig.name}`,

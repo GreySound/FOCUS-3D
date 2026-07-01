@@ -9,9 +9,9 @@
 
 export const siteConfig = {
   name: 'Focus 3D',
-  tagline: 'Arte Escultórico',
+  tagline: 'Esculturas Decorativas',
   description:
-    'Piezas escultóricas únicas de impresión 3D con acabados de galería. Mármol, piedra, obsidiana. Tiraje limitado.',
+    'Esculturas decorativas inspiradas en arte clásico. Impresión 3D con acabado manual. Envíos a todo México.',
 
   // URL pública del sitio (sin barra final). Usada en metadata, sitemap y OG.
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://focus3d.art',

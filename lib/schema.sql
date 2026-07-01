@@ -8,7 +8,7 @@ create table if not exists productos (
   id uuid primary key default gen_random_uuid(),
   nombre text not null,
   descripcion text,
-  linea text check (linea in ('Essentials','Statement','Signature','Custom','B2B')),
+  linea text check (linea in ('Catálogo','Custom')),
   precio_min int not null,
   precio_max int not null,
   stock int default 5,

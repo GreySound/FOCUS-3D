@@ -6,7 +6,7 @@ import { uploadImage } from '@/lib/upload-action'
 import { saveProducto } from '@/lib/admin-actions'
 import { useRouter } from 'next/navigation'
 
-const LINEAS = ['Essentials', 'Statement', 'Signature', 'Custom', 'B2B']
+const LINEAS = ['Catálogo', 'Custom']
 const ESTADOS = ['disponible', 'agotado', 'bajo_pedido']
 
 export default function ProductForm({ producto }: { producto?: Producto }) {
