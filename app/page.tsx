@@ -134,7 +134,7 @@ export default async function Home() {
         <div className="grid md:grid-cols-2 gap-0.5 bg-marble">
           {[
             { icon: '🛒', tag: 'Tienda oficial', name: 'Mercado Libre', desc: 'Compra segura con protección al comprador. Pago en línea, envíos a todo México, reseñas verificadas.', cta: 'Visitar tienda', href: siteConfig.social.mercadoLibre.url },
-            { icon: '📸', tag: 'Pedidos custom · DM abierto', name: 'Instagram', desc: 'Para piezas personalizadas y cotizaciones B2B. Respondemos en menos de 2 horas.', cta: 'Escribirnos', href: siteConfig.social.instagram.url },
+            { icon: '📸', tag: 'Pedidos custom · DM abierto', name: 'Instagram', desc: 'Para piezas personalizadas y cotizaciones. Envíanos un mensaje y te respondemos pronto.', cta: 'Escribirnos', href: siteConfig.social.instagram.url },
           ].map(({ icon, tag, name, desc, cta, href }) => (
             <a key={name} href={href} target="_blank" rel="noopener noreferrer"
               className="bg-pearl p-12 flex flex-col gap-5 hover:bg-carbon hover:text-pearl transition-all duration-300 group no-underline">

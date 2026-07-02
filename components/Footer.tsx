@@ -11,7 +11,7 @@ export default function Footer() {
             <div className="font-serif text-2xl italic text-pearl">{siteConfig.name}</div>
           </div>
           <p className="text-ash text-sm font-light leading-relaxed max-w-[240px]">
-            Arte escultórico de autor. Impresión 3D con acabados de galería. Hecho en {siteConfig.country}.
+            Esculturas decorativas inspiradas en arte clásico. Impresión 3D con acabado manual. Hecho en {siteConfig.country}.
           </p>
         </div>
         {[
