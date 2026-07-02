@@ -29,8 +29,9 @@ export default function Navbar() {
           </li>
         ))}
         <li>
-          <Link href="/contacto" className="font-mono text-[10px] tracking-[2px] uppercase bg-gold text-carbon px-5 py-2.5 hover:bg-gold-lt transition-colors">
-            Cotizar
+          <Link href="/contacto" className="font-mono text-[10px] tracking-[2px] uppercase bg-gold text-carbon px-5 py-2.5 hover:bg-gold-lt transition-colors group relative">
+            <span className="group-hover:opacity-0 transition-opacity">Cotizar</span>
+            <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">Contáctanos</span>
           </Link>
         </li>
       </ul>
