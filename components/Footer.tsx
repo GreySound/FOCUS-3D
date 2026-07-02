@@ -33,6 +33,13 @@ export default function Footer() {
           </div>
         ))}
       </div>
+      <div className="border-t border-stone/10 pt-6 pb-4">
+        <div className="flex flex-wrap gap-4 justify-center mb-4">
+          <Link href="/aviso-de-privacidad" className="text-ash text-xs hover:text-pearl transition-colors">
+            Aviso de Privacidad
+          </Link>
+        </div>
+      </div>
       <div className="border-t border-stone/10 pt-6 flex flex-col md:flex-row justify-between gap-2">
         <span className="font-mono text-[10px] tracking-wide text-ash">© {new Date().getFullYear()} {siteConfig.name} — {siteConfig.tagline}</span>
         <span className="font-mono text-[10px] tracking-wide text-ash">Hecho con precisión · {siteConfig.country}</span>
