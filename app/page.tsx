@@ -67,11 +67,11 @@ export default async function Home() {
             Focus 3D produce esculturas decorativas inspiradas en la historia, la mitología y el arte clásico. Usamos impresión 3D para reproducir piezas icónicas, y luego aplicamos un proceso de acabado manual que transforma cada impresión en una pieza con presencia visual.
           </p>
           <p className="text-marble font-light leading-relaxed">
-            Cada pieza pasa por lijado, imprimatura, pintura y acabado antes de enviarse. El resultado: esculturas que parecen talladas en piedra o fundidas en bronce, sin el peso ni el costo de los materiales originales.
+            Cada pieza pasa por preparación, lijado y pintura antes de enviarse. Acabado artesanal, durabilidad y un precio accesible.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-0.5 bg-stone/20">
-          {[['2', 'Impresoras activas'], ['100%', 'Acabado manual'], ['✓', 'Personalización de modelos disponible'], ['∞', 'Posibilidades custom']].map(([num, label]) => (
+          {[['Proyecto', 'Independiente'], ['100%', 'Acabado manual'], ['✓', 'Personalización de modelos disponible'], ['∞', 'Posibilidades custom']].map(([num, label]) => (
             <div key={label} className="bg-carbon p-8 text-center">
               <div className="font-serif text-5xl italic text-gold font-light mb-2">{num}</div>
               <div className="font-mono text-[9px] tracking-[2px] uppercase text-ash">{label}</div>
