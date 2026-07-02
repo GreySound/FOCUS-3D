@@ -14,12 +14,12 @@ export const siteConfig = {
     'Esculturas decorativas inspiradas en arte clásico. Impresión 3D con acabado manual. Envíos a todo México.',
 
   // URL pública del sitio (sin barra final). Usada en metadata, sitemap y OG.
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://focus3d.art',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.focusstudio3d.com',
   locale: 'es_MX',
   country: 'México',
 
   contact: {
-    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@focus3d.art',
+    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@focusstudio3d.com',
     // Teléfono visible (formato libre).
     phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '+52 667 192 3604',
     // WhatsApp en formato internacional, SOLO dígitos (lada 52 + 10 dígitos).
