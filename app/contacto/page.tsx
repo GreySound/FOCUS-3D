@@ -28,8 +28,6 @@ export default async function ContactoPage({
                   { label: 'Mercado Libre', value: siteConfig.social.mercadoLibre.label, href: siteConfig.social.mercadoLibre.url },
                   { label: 'WhatsApp', value: siteConfig.contact.phone, href: whatsappLink() },
                   { label: 'Email', value: siteConfig.contact.email, href: `mailto:${siteConfig.contact.email}` },
-                  { label: 'Tiempo de respuesta', value: siteConfig.contact.responseTime, href: null },
-                  { label: 'Envíos', value: siteConfig.contact.shipping, href: null },
                 ].map(({ label, value, href }) => (
                   <div key={label} className="border-l-2 border-gold pl-5">
                     <div className="font-mono text-[9px] tracking-[3px] uppercase text-gold mb-1">{label}</div>

@@ -131,7 +131,6 @@ export default function ContactForm({ productoId, productoNombre, motivo }: Prop
           <option>Pieza del catálogo</option>
           <option>Proyecto personalizado (custom)</option>
           <option>Logo 3D para negocio</option>
-          <option>Solo tengo una pregunta</option>
         </select>
       </div>
       <div className="flex flex-col gap-1.5">

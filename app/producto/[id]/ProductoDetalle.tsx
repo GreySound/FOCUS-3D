@@ -93,7 +93,6 @@ export default function ProductoDetalle({ producto: p, relacionados }: { product
                 ['Acabado disponible', 'Efecto mármol, piedra, obsidiana o custom'],
                 ['Disponibilidad', ESTADO_LABEL[p.estado]],
                 ['Stock disponible', `${p.stock} unidades disponibles`],
-                ['Envío', 'Todo México · 3–7 días hábiles'],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between items-center py-2 border-b border-stone/10 last:border-0">
                   <span className="font-mono text-[9px] tracking-[2px] uppercase text-ash">{label}</span>
