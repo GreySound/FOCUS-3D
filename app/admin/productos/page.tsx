@@ -5,6 +5,8 @@ import type { Producto } from '@/lib/supabase'
 import DeleteProductBtn from './DeleteProductBtn'
 import NotificarPromoBtn from './NotificarPromoBtn'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminProductos() {
   const supabase = await createServerSupabaseClient()
   const { data: productos } = await supabase.from('productos').select('*').order('created_at', { ascending: false })

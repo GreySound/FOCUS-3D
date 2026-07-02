@@ -3,6 +3,8 @@ import type { Mensaje } from '@/lib/supabase'
 import MarcarLeidoBtn from './MarcarLeidoBtn'
 import EliminarMensajeBtn from './EliminarMensajeBtn'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminMensajes() {
   const supabase = createAdminSupabaseClient()
   const { data: mensajes } = await supabase

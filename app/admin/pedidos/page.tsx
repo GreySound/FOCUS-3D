@@ -2,6 +2,8 @@ import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import type { Pedido } from '@/lib/supabase'
 import PedidoEstadoBtn from './PedidoEstadoBtn'
 
+export const dynamic = 'force-dynamic'
+
 const ESTADOS = ['nuevo', 'en_proceso', 'listo', 'enviado', 'entregado']
 const ESTADO_COLOR: Record<string, string> = {
   nuevo: 'text-blue-400 border-blue-400/30',

@@ -2,6 +2,8 @@ import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import type { Suscriptor } from '@/lib/supabase'
 import { CopiarContactos, SuscriptorAcciones, CuponUsadoBtn } from './SuscriptoresUI'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminSuscriptores() {
   const supabase = createAdminSupabaseClient()
   const { data: suscriptores } = await supabase

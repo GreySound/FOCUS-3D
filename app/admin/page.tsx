@@ -1,6 +1,8 @@
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard() {
   const supabase = createAdminSupabaseClient()
   const [{ count: totalProductos }, { count: totalPedidos }, { count: mensajesNuevos }, { count: pedidosNuevos }] = await Promise.all([
