@@ -29,11 +29,11 @@ export default function NewsletterPopup() {
   if (hiddenRoute || !open) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:justify-end p-0 sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
       {/* Velo suave */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={close} />
 
-      <div className="relative w-full sm:max-w-sm bg-ink border border-gold/20 p-7 overflow-hidden animate-[fadeUp_0.4s_ease-out]">
+      <div className="relative w-full max-w-sm bg-ink border border-gold/20 p-7 overflow-hidden animate-[fadeUp_0.4s_ease-out]">
         <ClassicalBackdrop />
         <button
           onClick={close}
