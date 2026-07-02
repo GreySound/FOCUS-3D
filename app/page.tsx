@@ -111,10 +111,10 @@ export default async function Home() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
           <div className="hidden md:block absolute top-6 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-gold to-transparent" />
           {[
-            ['01', 'Curaduría del catálogo', 'Seleccionamos modelos 3D inspirados en arte clásico, mitología e historia. No imprimimos cualquier cosa.'],
-            ['02', 'Impresión capa por capa', '0.1mm de resolución. Paredes gruesas. De 8 a 48 horas por pieza según tamaño.'],
-            ['03', 'Preparación y lijado', 'Masilla para uniones, lijado progresivo (220→400→800), imprimatura. Aquí se elimina toda textura de impresión.'],
-            ['04', 'Acabado final', 'Pintura, patinado y sellado. El resultado: acabados que imitan mármol, piedra, obsidiana o bronce.'],
+            ['01', 'Selección del catálogo', 'Elegimos modelos 3D inspirados en arte clásico, mitología e historia. Cada pieza tiene un propósito visual.'],
+            ['02', 'Impresión capa por capa', 'Boquilla de 0.4mm, paredes gruesas. De 24 a 72 horas por pieza según tamaño y complejidad.'],
+            ['03', 'Acabado artesanal', 'Relleno, lijado, pintura y detallado. Cada pieza se trabaja a mano para eliminar imperfecciones.'],
+            ['04', 'Acabado final', 'Pintura, patinado y sellado con acabados artísticos inspirados en la época clásica y mitológica.'],
           ].map(([num, title, desc]) => (
             <div key={num} className="text-center relative">
               <div className="w-12 h-12 border border-gold rounded-full flex items-center justify-center mx-auto mb-6 bg-carbon relative z-10">

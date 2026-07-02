@@ -90,7 +90,7 @@ export default function ProductoDetalle({ producto: p, relacionados }: { product
             <div className="flex flex-col gap-2 bg-ink p-5 border border-stone/10">
               {[
                 ['Línea', p.linea],
-                ['Acabado disponible', 'Efecto mármol, piedra, obsidiana o custom'],
+                ['Acabado disponible', 'Acabados artísticos inspirados en la época clásica'],
                 ['Disponibilidad', ESTADO_LABEL[p.estado]],
                 ['Stock disponible', `${p.stock} unidades disponibles`],
               ].map(([label, value]) => (
