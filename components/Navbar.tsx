@@ -21,7 +21,7 @@ export default function Navbar() {
 
       {/* Desktop */}
       <ul className="hidden md:flex items-center gap-9">
-        {[['Nosotros', '/#nosotros'], ['Catálogo', '/catalogo'], ['Proceso', '/#proceso']].map(([label, href]) => (
+        {[['Nosotros', '/#nosotros'], ['Proceso', '/#proceso'], ['Catálogo', '/catalogo']].map(([label, href]) => (
           <li key={label}>
             <Link href={href} className="font-mono text-[10px] tracking-[3px] uppercase text-stone hover:text-pearl transition-colors">
               {label}
@@ -46,7 +46,7 @@ export default function Navbar() {
       {/* Mobile menu */}
       {open && (
         <div className="absolute top-[72px] left-0 right-0 bg-carbon border-b border-stone/15 px-6 py-8 flex flex-col gap-6 md:hidden">
-          {[['Nosotros', '/#nosotros'], ['Catálogo', '/catalogo'], ['Proceso', '/#proceso'], ['Cotizar', '/contacto']].map(([label, href]) => (
+          {[['Nosotros', '/#nosotros'], ['Proceso', '/#proceso'], ['Catálogo', '/catalogo'], ['Cotizar', '/contacto']].map(([label, href]) => (
             <Link key={label} href={href} onClick={() => setOpen(false)}
               className="font-mono text-[11px] tracking-[3px] uppercase text-stone hover:text-pearl transition-colors">
               {label}
