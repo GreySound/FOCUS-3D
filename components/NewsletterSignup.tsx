@@ -108,23 +108,15 @@ export default function NewsletterSignup({ onDone }: { onDone?: () => void }) {
         className="input-field"
       />
       <input
+        required
         type="email"
         value={form.email}
         onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-        placeholder="Correo"
-        className="input-field"
-      />
-      <input
-        type="tel"
-        inputMode="numeric"
-        value={form.telefono}
-        onChange={handleTel}
-        placeholder="Celular (10 dígitos)"
-        maxLength={14}
+        placeholder="Correo electrónico"
         className="input-field"
       />
       <p className="text-ash font-light text-[10px] -mt-1">
-        Te enviamos el cupón por el canal que prefieras. Déjanos correo, celular o ambos.
+        Te enviaremos tu cupón del 10% directo a tu correo.
       </p>
 
       {/* Honeypot: oculto para humanos, los bots lo llenan */}
